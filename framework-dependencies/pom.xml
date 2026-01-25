@@ -86,6 +86,7 @@
         <m3u8-parser.version>0.22</m3u8-parser.version>
         <mapper-spring-boot-starter.version>2.1.5</mapper-spring-boot-starter.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
+        <modelmapper.version>3.2.0</modelmapper.version>
         <mapstruct-plus.version>1.4.3</mapstruct-plus.version>
         <mapstruct-spring-annotations.version>1.0.0</mapstruct-spring-annotations.version>
         <mapstruct-spring-extensions.version>1.0.0</mapstruct-spring-extensions.version>
@@ -311,6 +312,11 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modelmapper</groupId>
+                <artifactId>modelmapper</artifactId>
+                <version>${modelmapper.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>
