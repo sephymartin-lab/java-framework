@@ -249,6 +249,82 @@ class ModelMapperAutoConfigurationTest {
     }
 
     /**
+     * DynamicConversionService 懒加载测试
+     */
+    @Nested
+    @SpringBootTest(classes = DynamicConversionServiceTest.TestConfig.class)
+    @DisplayName("DynamicConversionService 懒加载测试")
+    class DynamicConversionServiceTest {
+
+        @Autowired
+        private ConversionService conversionService;
+
+        @Autowired
+        private DynamicConversionService dynamicConversionService;
+
+        @Test
+        @DisplayName("DynamicConversionService 应该被注入")
+        void dynamicConversionServiceShouldBeInjected() {
+            assertThat(dynamicConversionService).isNotNull();
+        }
+
+        @Test
+        @DisplayName("ConversionService 应该是 DynamicConversionService 类型")
+        void conversionServiceShouldBeDynamicType() {
+            assertThat(conversionService).isInstanceOf(DynamicConversionService.class);
+        }
+
+        @Test
+        @DisplayName("无需预注册即可转换")
+        void shouldConvertWithoutPreRegistration() {
+            // 无需预注册，直接转换
+            UserDO userDO = new UserDO(1L, "动态转换测试", "dynamic@example.com", 28);
+
+            UserDTO userDTO = conversionService.convert(userDO, UserDTO.class);
+
+            assertThat(userDTO).isNotNull();
+            assertThat(userDTO.getId()).isEqualTo(1L);
+            assertThat(userDTO.getName()).isEqualTo("动态转换测试");
+            assertThat(userDTO.getEmail()).isEqualTo("dynamic@example.com");
+        }
+
+        @Test
+        @DisplayName("首次转换后应该注册类型对")
+        void shouldRegisterAfterFirstConversion() {
+            // 转换前未注册
+            assertThat(dynamicConversionService.isRegistered(UserDO.class, CustomUserDTO.class)).isFalse();
+
+            // 执行转换
+            UserDO userDO = new UserDO(1L, "注册测试", "register@example.com", 25);
+            CustomUserDTO dto = conversionService.convert(userDO, CustomUserDTO.class);
+
+            // 转换后已注册
+            assertThat(dynamicConversionService.isRegistered(UserDO.class, CustomUserDTO.class)).isTrue();
+            assertThat(dto).isNotNull();
+        }
+
+        @Test
+        @DisplayName("canConvert 应该始终返回 true")
+        void canConvertShouldAlwaysReturnTrue() {
+            // 即使没有预注册，canConvert 也应该返回 true
+            assertThat(conversionService.canConvert(AddressDO.class, AddressDTO.class)).isTrue();
+            assertThat(conversionService.canConvert(String.class, Integer.class)).isTrue();
+        }
+
+        @Test
+        @DisplayName("null 值转换应该返回 null")
+        void nullConversionShouldReturnNull() {
+            UserDTO result = conversionService.convert(null, UserDTO.class);
+            assertThat(result).isNull();
+        }
+
+        @Configuration
+        @EnableAutoConfiguration
+        static class TestConfig {
+        }
+    }
+
+    /**
      * 配置属性测试
      */
     @Nested

@@ -25,6 +25,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -98,6 +100,23 @@ public class ModelMapperAutoConfiguration {
     }
 
     /**
+     * 创建 DynamicConversionService Bean
+     * <p>
+     * 支持懒加载动态注册的 ConversionService 实现，首次调用 convert 时自动注册转换器。
+     * 使用 @Primary 注解确保作为默认的 ConversionService 被注入。
+     * </p>
+     *
+     * @param modelMapper ModelMapper 实例
+     * @return DynamicConversionService 实例
+     */
+    @Bean
+    @Primary
+    @ConditionalOnMissingBean(DynamicConversionService.class)
+    public DynamicConversionService dynamicConversionService(ModelMapper modelMapper) {
+        return new DynamicConversionService(modelMapper);
+    }
+
+    /**
      * 创建可配置的 ConversionService，用于注册自定义转换器
      * <p>
      * 如果容器中没有 ConfigurableConversionService，则创建一个 DefaultConversionService
@@ -107,7 +126,7 @@ public class ModelMapperAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(ConfigurableConversionService.class)
-    public ConfigurableConversionService conversionService() {
+    public ConfigurableConversionService configurableConversionService() {
         return new DefaultConversionService();
     }
 
