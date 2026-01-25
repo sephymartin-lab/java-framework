@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -209,15 +210,17 @@ class ModelMapperAutoConfigurationTest {
     class ConversionServiceTest {
 
         @Autowired
+        @Qualifier("modelMapperConversionService")
         private ConversionService conversionService;
 
         @Autowired
         private ModelMapperAutoConfiguration.ModelMapperConversionServiceConfigurer configurer;
 
         @Test
-        @DisplayName("ConversionService 应该被注入")
+        @DisplayName("modelMapperConversionService 应该被注入")
         void conversionServiceShouldBeInjected() {
             assertThat(conversionService).isNotNull();
+            assertThat(conversionService).isInstanceOf(DynamicConversionService.class);
         }
 
         @Test
@@ -257,6 +260,7 @@ class ModelMapperAutoConfigurationTest {
     class DynamicConversionServiceTest {
 
         @Autowired
+        @Qualifier("modelMapperConversionService")
         private ConversionService conversionService;
 
         @Autowired
@@ -269,7 +273,7 @@ class ModelMapperAutoConfigurationTest {
         }
 
         @Test
-        @DisplayName("ConversionService 应该是 DynamicConversionService 类型")
+        @DisplayName("通过 Qualifier 注入的 ConversionService 应该是 DynamicConversionService 类型")
         void conversionServiceShouldBeDynamicType() {
             assertThat(conversionService).isInstanceOf(DynamicConversionService.class);
         }

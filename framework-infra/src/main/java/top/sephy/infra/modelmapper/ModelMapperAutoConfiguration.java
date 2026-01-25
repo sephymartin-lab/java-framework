@@ -25,8 +25,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -103,16 +101,28 @@ public class ModelMapperAutoConfiguration {
      * 创建 DynamicConversionService Bean
      * <p>
      * 支持懒加载动态注册的 ConversionService 实现，首次调用 convert 时自动注册转换器。
-     * 使用 @Primary 注解确保作为默认的 ConversionService 被注入。
+     * 使用特定的 Bean 名称避免与 Spring 内置的 ConversionService 冲突。
+     * </p>
+     * <p>
+     * 注入方式：
+     * <pre>{@code
+     * // 方式 1: 使用 @Qualifier
+     * @Resource
+     * @Qualifier("modelMapperConversionService")
+     * private ConversionService conversionService;
+     *
+     * // 方式 2: 直接注入 DynamicConversionService 类型
+     * @Resource
+     * private DynamicConversionService conversionService;
+     * }</pre>
      * </p>
      *
      * @param modelMapper ModelMapper 实例
      * @return DynamicConversionService 实例
      */
-    @Bean
-    @Primary
-    @ConditionalOnMissingBean(DynamicConversionService.class)
-    public DynamicConversionService dynamicConversionService(ModelMapper modelMapper) {
+    @Bean("modelMapperConversionService")
+    @ConditionalOnMissingBean(name = "modelMapperConversionService")
+    public DynamicConversionService modelMapperConversionService(ModelMapper modelMapper) {
         return new DynamicConversionService(modelMapper);
     }
 
