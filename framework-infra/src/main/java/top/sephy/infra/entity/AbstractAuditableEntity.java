@@ -16,12 +16,30 @@
 package top.sephy.infra.entity;
 
 import lombok.Data;
+import top.sephy.infra.mybatis.audit.annotaton.CreatorId;
+import top.sephy.infra.mybatis.audit.annotaton.ModifierId;
 
 /**
- * @deprecated 请使用 {@link AbstractTenantAuditableEntity} 替代
+ * 完整审计实体抽象类
+ *
+ * 包含字段：id、createdTime、updatedTime、createdBy（创建人）、updatedBy（更新人）
+ *
+ * 适用场景：后台管理系统、需要追溯操作人的业务数据
+ *
+ * @author sephy
  */
 @Data
-@Deprecated
-public abstract class AbstractTenantEntity extends AbstractTenantAuditableEntity {
+public abstract class AbstractAuditableEntity extends AbstractBaseEntity implements OperatorAuditable {
 
+    /**
+     * 创建人ID
+     */
+    @CreatorId
+    protected Long createdBy;
+
+    /**
+     * 更新人ID
+     */
+    @ModifierId
+    protected Long updatedBy;
 }

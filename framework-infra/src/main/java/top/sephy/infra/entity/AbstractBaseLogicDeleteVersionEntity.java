@@ -31,7 +31,13 @@ import top.sephy.infra.mybatis.audit.annotaton.CreatorId;
 import top.sephy.infra.mybatis.audit.annotaton.ModifiedTime;
 import top.sephy.infra.mybatis.audit.annotaton.ModifierId;
 
+/**
+ * 逻辑删除+乐观锁实体抽象类
+ *
+ * @deprecated 建议继承 {@link AbstractAuditableEntity}，按需添加 deleted 和 version 字段
+ */
 @Data
+@Deprecated
 public abstract class AbstractBaseLogicDeleteVersionEntity implements Serializable {
 
     @Serial
@@ -40,6 +46,7 @@ public abstract class AbstractBaseLogicDeleteVersionEntity implements Serializab
     @Schema(description = "主键")
     @TableId(type = IdType.AUTO)
     protected Long id;
+
     /**
      * 创建人
      */
@@ -53,7 +60,7 @@ public abstract class AbstractBaseLogicDeleteVersionEntity implements Serializab
     protected LocalDateTime createdTime;
 
     /**
-     * 创建日期
+     * 更新人
      */
     @ModifierId
     protected Long updatedBy;

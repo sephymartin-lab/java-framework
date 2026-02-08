@@ -243,5 +243,7 @@ public class AutoFillInterceptor implements Interceptor {
         private Field modifierIdField;
 
         private Field modifierNameField;
+
+        private Field uidField;
     }
 }

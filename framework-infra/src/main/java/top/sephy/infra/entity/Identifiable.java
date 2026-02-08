@@ -15,13 +15,25 @@
  */
 package top.sephy.infra.entity;
 
-import lombok.Data;
-
 /**
- * @deprecated 请使用 {@link AbstractTenantAuditableEntity} 替代
+ * 可标识接口，表示实体具有主键
+ *
+ * @param <T> 主键类型
+ * @author sephy
  */
-@Data
-@Deprecated
-public abstract class AbstractTenantEntity extends AbstractTenantAuditableEntity {
+public interface Identifiable<T> {
 
+    /**
+     * 获取主键
+     *
+     * @return 主键值
+     */
+    T getId();
+
+    /**
+     * 设置主键
+     *
+     * @param id 主键值
+     */
+    void setId(T id);
 }

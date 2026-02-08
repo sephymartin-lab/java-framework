@@ -43,8 +43,6 @@ public interface CustomBaseMapper<T> extends BaseMapper<T> {
         throw new SystemException(StringUtils.isBlank(errorMsg) ? "数据不存在" : errorMsg);
     }
 
-    int upsert(T entity);
-
     /**
      * 全字段插入
      * 

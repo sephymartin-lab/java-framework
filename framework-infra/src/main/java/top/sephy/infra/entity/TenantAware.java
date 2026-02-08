@@ -15,13 +15,24 @@
  */
 package top.sephy.infra.entity;
 
-import lombok.Data;
-
 /**
- * @deprecated 请使用 {@link AbstractTenantAuditableEntity} 替代
+ * 多租户接口，表示实体具有租户标识
+ *
+ * @author sephy
  */
-@Data
-@Deprecated
-public abstract class AbstractTenantEntity extends AbstractTenantAuditableEntity {
+public interface TenantAware {
 
+    /**
+     * 获取租户ID
+     *
+     * @return 租户ID
+     */
+    Long getTenantId();
+
+    /**
+     * 设置租户ID
+     *
+     * @param tenantId 租户ID
+     */
+    void setTenantId(Long tenantId);
 }

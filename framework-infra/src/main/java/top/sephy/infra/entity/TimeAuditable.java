@@ -15,15 +15,40 @@
  */
 package top.sephy.infra.entity;
 
-import lombok.Data;
+import java.time.LocalDateTime;
 
 /**
+ * 时间审计接口，表示实体具有创建时间和更新时间
+ *
  * @author sephy
- * @date 2020-06-13 23:45
- * @deprecated 请使用 {@link AbstractAuditableEntity} 替代
  */
-@Data
-@Deprecated
-public abstract class AbstractEntity extends AbstractAuditableEntity {
+public interface TimeAuditable {
 
+    /**
+     * 获取创建时间
+     *
+     * @return 创建时间
+     */
+    LocalDateTime getCreatedTime();
+
+    /**
+     * 设置创建时间
+     *
+     * @param createdTime 创建时间
+     */
+    void setCreatedTime(LocalDateTime createdTime);
+
+    /**
+     * 获取更新时间
+     *
+     * @return 更新时间
+     */
+    LocalDateTime getUpdatedTime();
+
+    /**
+     * 设置更新时间
+     *
+     * @param updatedTime 更新时间
+     */
+    void setUpdatedTime(LocalDateTime updatedTime);
 }

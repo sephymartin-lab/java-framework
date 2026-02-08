@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -39,13 +40,20 @@ public abstract class DateTimeUtils {
 
     public static final String TIME_ZONE_BEIJING = "Asia/Shanghai";
 
-    public static final String PATTERN_DATE = "yyyy-MM-dd";
+    public static final String PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
 
-    public static final String PATTERN_TIME = "HH:mm:ss";
+    public static final String PATTERN_HH_MM_SS = "HH:mm:ss";
 
     public static final LocalDateTime MYSQL_MIN_DATETIME = LocalDateTime.of(1000, 1, 1, 0, 0, 0);
 
-    public static final String PATTERN_DATE_TIME = PATTERN_DATE + " " + PATTERN_TIME;
+    public static final String PATTERN_YYYY_MM_DD_HH_MM_SS = PATTERN_YYYY_MM_DD + " " + PATTERN_HH_MM_SS;
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD_HH_MM_SS = DateTimeFormatter.ofPattern(PATTERN_YYYY_MM_DD_HH_MM_SS);
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_YYYY_MM_DD = DateTimeFormatter.ofPattern(PATTERN_YYYY_MM_DD);
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_HH_MM_SS = DateTimeFormatter.ofPattern(PATTERN_HH_MM_SS);
+
 
     public static int toDateKey(Date date) {
         if (date == null) {

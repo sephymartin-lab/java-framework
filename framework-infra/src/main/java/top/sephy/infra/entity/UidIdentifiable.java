@@ -15,13 +15,25 @@
  */
 package top.sephy.infra.entity;
 
-import lombok.Data;
-
 /**
- * @deprecated 请使用 {@link AbstractTenantAuditableEntity} 替代
+ * 可标识接口（逻辑主键），表示实体具有逻辑主键（uid）
+ *
+ * @param <UID> 逻辑主键类型
+ * @author sephy
  */
-@Data
-@Deprecated
-public abstract class AbstractTenantEntity extends AbstractTenantAuditableEntity {
+public interface UidIdentifiable<UID> {
 
+    /**
+     * 获取逻辑主键
+     *
+     * @return 逻辑主键值
+     */
+    UID getUid();
+
+    /**
+     * 设置逻辑主键
+     *
+     * @param uid 逻辑主键值
+     */
+    void setUid(UID uid);
 }

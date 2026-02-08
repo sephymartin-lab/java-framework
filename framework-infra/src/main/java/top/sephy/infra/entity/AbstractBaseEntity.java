@@ -15,14 +15,47 @@
  */
 package top.sephy.infra.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 
 import lombok.Data;
+import top.sephy.infra.mybatis.audit.annotaton.CreatedTime;
+import top.sephy.infra.mybatis.audit.annotaton.ModifiedTime;
 
+/**
+ * 基础实体抽象类
+ *
+ * 包含字段：id（自增主键）、createdTime（创建时间）、updatedTime（更新时间）
+ *
+ * 适用场景：系统表、配置表、C端数据、无需操作人审计的场景
+ *
+ * @author sephy
+ */
 @Data
-public abstract class AbstractBaseEntity extends AbstractEntity {
+public abstract class AbstractBaseEntity implements Serializable, Identifiable<Long>, TimeAuditable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键
+     */
     @TableId(type = IdType.AUTO)
     protected Long id;
+
+    /**
+     * 创建时间
+     */
+    @CreatedTime
+    protected LocalDateTime createdTime;
+
+    /**
+     * 更新时间
+     */
+    @ModifiedTime
+    protected LocalDateTime updatedTime;
 }

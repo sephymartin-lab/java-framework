@@ -18,10 +18,19 @@ package top.sephy.infra.entity;
 import lombok.Data;
 
 /**
- * @deprecated 请使用 {@link AbstractTenantAuditableEntity} 替代
+ * 多租户完整审计实体抽象类
+ *
+ * 包含字段：id、createdTime、updatedTime、createdBy、updatedBy、tenantId（租户ID）
+ *
+ * 适用场景：多租户系统中，需要完整审计的业务数据
+ *
+ * @author sephy
  */
 @Data
-@Deprecated
-public abstract class AbstractTenantEntity extends AbstractTenantAuditableEntity {
+public abstract class AbstractTenantAuditableEntity extends AbstractAuditableEntity implements TenantAware {
 
+    /**
+     * 租户ID
+     */
+    protected Long tenantId;
 }

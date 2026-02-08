@@ -122,8 +122,8 @@ public class ModelMapperAutoConfiguration {
      */
     @Bean("modelMapperConversionService")
     @ConditionalOnMissingBean(name = "modelMapperConversionService")
-    public DynamicConversionService modelMapperConversionService(ModelMapper modelMapper) {
-        return new DynamicConversionService(modelMapper);
+    public ModelMapperConversionService modelMapperConversionService(ModelMapper modelMapper) {
+        return new ModelMapperConversionService(modelMapper);
     }
 
     /**

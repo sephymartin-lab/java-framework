@@ -31,7 +31,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 import org.springframework.test.context.TestPropertySource;
 
 import lombok.AllArgsConstructor;
@@ -220,7 +219,7 @@ class ModelMapperAutoConfigurationTest {
         @DisplayName("modelMapperConversionService 应该被注入")
         void conversionServiceShouldBeInjected() {
             assertThat(conversionService).isNotNull();
-            assertThat(conversionService).isInstanceOf(DynamicConversionService.class);
+            assertThat(conversionService).isInstanceOf(ModelMapperConversionService.class);
         }
 
         @Test
@@ -255,27 +254,27 @@ class ModelMapperAutoConfigurationTest {
      * DynamicConversionService 懒加载测试
      */
     @Nested
-    @SpringBootTest(classes = DynamicConversionServiceTest.TestConfig.class)
+    @SpringBootTest(classes = ModelMapperConversionServiceTest.TestConfig.class)
     @DisplayName("DynamicConversionService 懒加载测试")
-    class DynamicConversionServiceTest {
+    class ModelMapperConversionServiceTest {
 
         @Autowired
         @Qualifier("modelMapperConversionService")
         private ConversionService conversionService;
 
         @Autowired
-        private DynamicConversionService dynamicConversionService;
+        private ModelMapperConversionService modelMapperConversionService;
 
         @Test
         @DisplayName("DynamicConversionService 应该被注入")
         void dynamicConversionServiceShouldBeInjected() {
-            assertThat(dynamicConversionService).isNotNull();
+            assertThat(modelMapperConversionService).isNotNull();
         }
 
         @Test
         @DisplayName("通过 Qualifier 注入的 ConversionService 应该是 DynamicConversionService 类型")
         void conversionServiceShouldBeDynamicType() {
-            assertThat(conversionService).isInstanceOf(DynamicConversionService.class);
+            assertThat(conversionService).isInstanceOf(ModelMapperConversionService.class);
         }
 
         @Test
@@ -296,14 +295,14 @@ class ModelMapperAutoConfigurationTest {
         @DisplayName("首次转换后应该注册类型对")
         void shouldRegisterAfterFirstConversion() {
             // 转换前未注册
-            assertThat(dynamicConversionService.isRegistered(UserDO.class, CustomUserDTO.class)).isFalse();
+            assertThat(modelMapperConversionService.isRegistered(UserDO.class, CustomUserDTO.class)).isFalse();
 
             // 执行转换
             UserDO userDO = new UserDO(1L, "注册测试", "register@example.com", 25);
             CustomUserDTO dto = conversionService.convert(userDO, CustomUserDTO.class);
 
             // 转换后已注册
-            assertThat(dynamicConversionService.isRegistered(UserDO.class, CustomUserDTO.class)).isTrue();
+            assertThat(modelMapperConversionService.isRegistered(UserDO.class, CustomUserDTO.class)).isTrue();
             assertThat(dto).isNotNull();
         }
 

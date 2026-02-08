@@ -19,8 +19,15 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 
 import lombok.Data;
 
+/**
+ * 逻辑删除实体抽象类（含完整审计）
+ *
+ * @deprecated 建议在具体实体类中按需添加逻辑删除字段：
+ *             {@code @TableLogic(value = "0", delval = "id") protected Long deleted;}
+ */
 @Data
-public abstract class AbstractBaseLogicDeleteEntity extends AbstractBaseEntity {
+@Deprecated
+public abstract class AbstractBaseLogicDeleteEntity extends AbstractAuditableEntity {
 
     @TableLogic(value = "0", delval = "id")
     protected Long deleted;

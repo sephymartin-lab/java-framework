@@ -15,13 +15,38 @@
  */
 package top.sephy.infra.entity;
 
-import lombok.Data;
-
 /**
- * @deprecated 请使用 {@link AbstractTenantAuditableEntity} 替代
+ * 操作人审计接口，表示实体具有创建人和更新人
+ *
+ * @author sephy
  */
-@Data
-@Deprecated
-public abstract class AbstractTenantEntity extends AbstractTenantAuditableEntity {
+public interface OperatorAuditable {
 
+    /**
+     * 获取创建人ID
+     *
+     * @return 创建人ID
+     */
+    Long getCreatedBy();
+
+    /**
+     * 设置创建人ID
+     *
+     * @param createdBy 创建人ID
+     */
+    void setCreatedBy(Long createdBy);
+
+    /**
+     * 获取更新人ID
+     *
+     * @return 更新人ID
+     */
+    Long getUpdatedBy();
+
+    /**
+     * 设置更新人ID
+     *
+     * @param updatedBy 更新人ID
+     */
+    void setUpdatedBy(Long updatedBy);
 }

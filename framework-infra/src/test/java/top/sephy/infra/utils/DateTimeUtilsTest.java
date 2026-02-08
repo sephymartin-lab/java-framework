@@ -41,16 +41,16 @@ class DateTimeUtilsTest {
     @AllArgsConstructor
     public static class LocalDateTimeWithZone {
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "GMT+8")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "GMT+8")
         private Date date1;
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "Asia/Shanghai")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "Asia/Shanghai")
         private Date date2;
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "GMT+8")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "GMT+8")
         private LocalDate ld1;
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "Asia/Shanghai")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "Asia/Shanghai")
         private LocalDate ld2;
     }
 }
