@@ -12,13 +12,13 @@ steps:
       - event: [push, pull_request]
     failure: ignore
 
-  - name: maven-build
+  - name: maven-deploy
     image: maven:3.9.12-eclipse-temurin-25-noble
     commands:
       - cd framework-dependencies
-      - mvn clean install -Dmaven.test.skip=true -B
+      - mvn deploy -Dmaven.test.skip=true -B
       - cd ../framework-infra
-      - mvn clean install -Dmaven.test.skip=true -B
+      - mvn deploy -Dmaven.test.skip=true -B
 
   - name: notify-success
     image: python:3-alpine
