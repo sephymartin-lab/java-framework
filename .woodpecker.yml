@@ -1,4 +1,17 @@
 steps:
+  - name: notify-start
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+    commands:
+      - python3 scripts/ci/notify/notify_start.py
+    when:
+      - event: [push, pull_request]
+    failure: ignore
+
   - name: maven-build
     image: maven:3.9.12-eclipse-temurin-25-noble
     commands:
@@ -6,3 +19,29 @@ steps:
       - mvn clean install -Dmaven.test.skip=true -B
       - cd ../framework-infra
       - mvn clean install -Dmaven.test.skip=true -B
+
+  - name: notify-success
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+    commands:
+      - python3 scripts/ci/notify/notify_complete.py success
+    when:
+      - status: success
+    failure: ignore
+
+  - name: notify-failure
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+    commands:
+      - python3 scripts/ci/notify/notify_complete.py failure
+    when:
+      - status: failure
+    failure: ignore
