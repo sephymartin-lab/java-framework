@@ -118,8 +118,8 @@
         <spring-cloud.version>2025.0.1</spring-cloud.version>
         <springdoc-openapi.version>2.8.6</springdoc-openapi.version>
         <!-- Spotless 配置文件目录，使用项目本地 style 目录 -->
-        <!-- 使用 maven.multiModuleProjectDirectory 指向父项目根目录，确保所有子模块都能找到配置文件 -->
-        <style.folder>${maven.multiModuleProjectDirectory}/style</style.folder>
+        <!-- 使用 project.basedir/.. 指向父项目根目录，确保所有子模块都能找到配置文件 -->
+        <style.folder>${project.basedir}/../style</style.folder>
         <eclipse-code-formatter.version>4.26</eclipse-code-formatter.version>
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <swagger-project-jakarta.version>2.2.8</swagger-project-jakarta.version>
