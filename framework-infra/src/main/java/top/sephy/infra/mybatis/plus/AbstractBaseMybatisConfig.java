@@ -15,7 +15,6 @@
  */
 package top.sephy.infra.mybatis.plus;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.convert.Jsr310Converters;
@@ -24,8 +23,7 @@ import org.springframework.data.util.NullableWrapperConverters;
 import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
-import com.github.pagehelper.PageInterceptor;
-import com.github.pagehelper.autoconfigure.PageHelperStandardProperties;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 
 import top.sephy.infra.mybatis.interceptor.AutoFillInterceptor;
 import top.sephy.infra.mybatis.interceptor.CurrentUserExtractor;
@@ -88,14 +86,9 @@ public abstract class AbstractBaseMybatisConfig {
         return new QueryConditionExtractorInterceptor(queryContextExtractor);
     }
 
-    @ConditionalOnClass(PageHelperStandardProperties.class)
     @Bean
-    public ConfigurationCustomizer mybatisPlusConfigurationCustomizer(PageHelperStandardProperties standardProperties) {
-
+    public ConfigurationCustomizer mybatisPlusConfigurationCustomizer() {
         return configuration -> {
-            PageInterceptor pageInterceptor = new PageInterceptor();
-            pageInterceptor.setProperties(standardProperties.getProperties());
-            configuration.addInterceptor(pageInterceptor);
             configuration.addInterceptor(mybatisPlusInterceptor());
             configuration.addInterceptor(auditingInterceptor());
             configuration.addInterceptor(queryConditionExtractorInterceptor(queryCriteriaExtractor()));
@@ -105,9 +98,10 @@ public abstract class AbstractBaseMybatisConfig {
     // @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        // 添加分页插件（必须在最前面）
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         // 防止不带 where 条件全表更新/删除
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
-        /// interceptor.addInnerInterceptor(new InsertBatchSomeColumnInterceptor());
         return interceptor;
     }
 

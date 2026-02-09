@@ -15,6 +15,8 @@
  */
 package top.sephy.infra.paging;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import top.sephy.infra.mybatis.query.IgnoreQuery;
@@ -38,4 +40,24 @@ public class PagingQuery {
     @Schema(description = "分页大小")
     @IgnoreQuery
     private int pageSize = 20;
+
+    /**
+     * 转换为 MyBatis-Plus 的 Page 对象
+     *
+     * @param <T> 实体类型
+     * @return MyBatis-Plus Page 对象
+     */
+    public <T> Page<T> toMpPage() {
+        return new Page<>(pageNum, pageSize);
+    }
+
+    /**
+     * 转换为 MyBatis-Plus 的 Page 对象，不查询总数
+     *
+     * @param <T> 实体类型
+     * @return MyBatis-Plus Page 对象
+     */
+    public <T> Page<T> toMpPageNoCount() {
+        return new Page<>(pageNum, pageSize, false);
+    }
 }
