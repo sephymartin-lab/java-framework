@@ -22,8 +22,10 @@ scripts/ci/
 #### 功能说明
 
 - `feishu_notify.py`: 飞书 Webhook 通知核心模块，提供签名生成和消息发送功能
-- `notify_start.py`: 在 CI 构建开始时发送飞书通知
-- `notify_complete.py`: 在 CI 构建完成时发送飞书通知
+  - `send_message()`: 发送纯文本消息（向后兼容）
+  - `send_post_message()`: 发送富文本 post 消息（支持加粗、链接等格式）
+- `notify_start.py`: 在 CI 构建开始时发送飞书通知（使用富文本格式）
+- `notify_complete.py`: 在 CI 构建完成时发送飞书通知（使用富文本格式，包含耗时统计）
 
 #### 环境变量
 
@@ -32,6 +34,8 @@ scripts/ci/
 
 #### CI 环境变量（自动获取）
 
+通知脚本会自动从 CI 环境变量中获取以下信息：
+
 - `CI_REPO_NAME`: 仓库名称
 - `CI_PIPELINE_NUMBER`: 构建编号
 - `CI_COMMIT_SHA`: 提交 SHA
@@ -39,6 +43,14 @@ scripts/ci/
 - `CI_COMMIT_MESSAGE`: 提交信息
 - `CI_PIPELINE_EVENT`: 构建事件类型
 - `CI_PIPELINE_URL`: 构建详情 URL
+- `CI_PIPELINE_STARTED`: 构建开始时间（UNIX 时间戳，用于计算耗时）
+
+> **完整环境变量列表**: 请参考 [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)
+
+**耗时计算说明**：
+- `notify_complete.py` 会自动计算构建耗时（从 `CI_PIPELINE_STARTED` 到当前时间）
+- 如果 `CI_PIPELINE_STARTED` 不存在，耗时信息将不会显示
+- 耗时格式：`2分35秒`、`45秒`、`1小时12分` 等
 
 #### 使用方法
 

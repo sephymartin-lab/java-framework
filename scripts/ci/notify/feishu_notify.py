@@ -35,7 +35,7 @@ def generate_signature(secret: str) -> tuple[str, str]:
 
 def send_message(webhook_url: str, secret: str, message: str) -> bool:
     """
-    发送消息到飞书 webhook
+    发送文本消息到飞书 webhook
     
     Args:
         webhook_url: webhook URL
@@ -56,6 +56,85 @@ def send_message(webhook_url: str, secret: str, message: str) -> bool:
             "msg_type": "text",
             "content": {
                 "text": message
+            }
+        }
+        
+        # 发送请求
+        req = urllib.request.Request(
+            webhook_url,
+            data=json.dumps(data).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        
+        response = urllib.request.urlopen(req)
+        response_data = json.loads(response.read().decode('utf-8'))
+        
+        if response_data.get('code') == 0:
+            return True
+        else:
+            print(f"错误: {response_data.get('msg')}", file=os.sys.stderr)
+            return False
+            
+    except urllib.error.HTTPError as e:
+        print(f"HTTP 错误: {e.code} {e.reason}", file=os.sys.stderr)
+        try:
+            error_body = e.read().decode('utf-8')
+            print(f"错误响应: {error_body}", file=os.sys.stderr)
+        except:
+            pass
+        return False
+    except Exception as e:
+        print(f"发生错误: {type(e).__name__}: {e}", file=os.sys.stderr)
+        return False
+
+
+def send_post_message(webhook_url: str, secret: str, title: str, content_lines: list) -> bool:
+    """
+    发送富文本 post 消息到飞书 webhook
+    
+    Args:
+        webhook_url: webhook URL
+        secret: 签名密钥
+        title: 消息标题
+        content_lines: 内容行列表，每个元素是一个列表，包含该行的文本元素
+                      每个文本元素可以是字符串（普通文本）或字典（带样式的文本）
+                      例如: [
+                          [{"tag": "text", "text": "【状态】", "style": ["bold"]}, "成功"],
+                          [{"tag": "text", "text": "【分支】", "style": ["bold"]}, "main"]
+                      ]
+        
+    Returns:
+        是否发送成功
+    """
+    try:
+        # 生成签名
+        timestamp, sign = generate_signature(secret)
+        
+        # 处理内容行，将字符串转换为文本元素
+        processed_content = []
+        for line in content_lines:
+            processed_line = []
+            for item in line:
+                if isinstance(item, str):
+                    # 字符串直接作为普通文本
+                    processed_line.append({"tag": "text", "text": item})
+                elif isinstance(item, dict):
+                    # 字典直接使用（应包含 tag、text、style 等字段）
+                    processed_line.append(item)
+            processed_content.append(processed_line)
+        
+        # 构建请求体
+        data = {
+            "timestamp": timestamp,
+            "sign": sign,
+            "msg_type": "post",
+            "content": {
+                "post": {
+                    "zh_cn": {
+                        "title": title,
+                        "content": processed_content
+                    }
+                }
             }
         }
         
