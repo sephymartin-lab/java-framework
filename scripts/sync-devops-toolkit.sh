@@ -53,7 +53,8 @@ git fetch ${REMOTE_NAME} ${DEVOPS_TOOLKIT_BRANCH}
 
 # 获取最新的 commit hash
 LATEST_COMMIT=$(git rev-parse ${REMOTE_NAME}/${DEVOPS_TOOLKIT_BRANCH})
-CURRENT_COMMIT=$(git log -1 --format="%B" | sed -nE 's/.*devops-toolkit@([a-f0-9]+).*/\1/p' | head -1 || echo "")
+# 查找最近的包含 devops-toolkit@ 的 commit message
+CURRENT_COMMIT=$(git log --grep="devops-toolkit@" --format="%B" -1 | sed -nE 's/.*devops-toolkit@([a-f0-9]+).*/\1/p' | head -1 || echo "")
 
 if [ "$CURRENT_COMMIT" = "$LATEST_COMMIT" ]; then
     echo -e "${GREEN}devops-toolkit 配置已经是最新的 (${LATEST_COMMIT:0:8})${NC}"
