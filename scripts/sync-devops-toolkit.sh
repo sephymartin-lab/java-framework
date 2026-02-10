@@ -89,7 +89,12 @@ sync_directory() {
     while IFS= read -r file; do
         if [ -n "$file" ]; then
             local dest_file="${TEMP_DIR}/${file}"
-            mkdir -p "$(dirname "$dest_file")"
+            local dest_dir="$(dirname "$dest_file")"
+            mkdir -p "$dest_dir" || {
+                echo -e "${RED}错误: 无法创建目录 ${dest_dir}${NC}"
+                failed=1
+                continue
+            }
             if ! git show ${REMOTE_NAME}/${DEVOPS_TOOLKIT_BRANCH}:${file} > "$dest_file" 2>/dev/null; then
                 echo -e "${RED}错误: 无法获取文件 ${file}${NC}"
                 failed=1
