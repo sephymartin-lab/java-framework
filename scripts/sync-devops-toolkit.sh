@@ -16,8 +16,6 @@ NC='\033[0m' # No Color
 DEVOPS_TOOLKIT_REPO="git@github.com:sephymartin/devops-toolkit.git"
 DEVOPS_TOOLKIT_BRANCH="main"
 REMOTE_NAME="devops-toolkit"
-# 保留的备份数量（保留最近 N 个备份）
-KEEP_BACKUPS=3
 
 # 定义同步配置：源目录 -> 目标目录
 declare -a SYNC_CONFIGS=(
@@ -58,41 +56,8 @@ LATEST_COMMIT=$(git rev-parse ${REMOTE_NAME}/${DEVOPS_TOOLKIT_BRANCH})
 # 查找最近的包含 devops-toolkit@ 的 commit message
 CURRENT_COMMIT=$(git log --grep="devops-toolkit@" --format="%B" -1 | sed -nE 's/.*devops-toolkit@([a-f0-9]+).*/\1/p' | head -1 || echo "")
 
-# 清理旧备份函数（提前定义，以便在检测到已是最新版本时也能清理）
-cleanup_old_backups() {
-    local target_dir=$1
-    local target_base=$(basename "$target_dir")
-    local target_parent=$(dirname "$target_dir")
-    
-    # 查找所有备份目录并按时间排序（最新的在前）
-    local backups=$(find "$target_parent" -maxdepth 1 -type d -name "${target_base}.backup.*" 2>/dev/null | sort -r)
-    
-    if [ -z "$backups" ]; then
-        return 0
-    fi
-    
-    # 计算需要删除的备份数量
-    local backup_count=$(echo "$backups" | wc -l | tr -d ' ')
-    local to_delete=$((backup_count - KEEP_BACKUPS))
-    
-    if [ $to_delete -gt 0 ]; then
-        echo -e "${GREEN}清理旧备份（保留最近 ${KEEP_BACKUPS} 个）...${NC}"
-        echo "$backups" | tail -n $to_delete | while read -r backup; do
-            if [ -d "$backup" ]; then
-                echo -e "  删除: $(basename "$backup")"
-                rm -rf "$backup"
-            fi
-        done
-    fi
-}
-
 if [ "$CURRENT_COMMIT" = "$LATEST_COMMIT" ]; then
     echo -e "${GREEN}devops-toolkit 配置已经是最新的 (${LATEST_COMMIT:0:8})${NC}"
-    # 即使已是最新版本，也清理旧备份
-    for config in "${SYNC_CONFIGS[@]}"; do
-        IFS=':' read -r source_dir target_dir <<< "$config"
-        cleanup_old_backups "$target_dir"
-    done
     exit 0
 fi
 
@@ -144,12 +109,6 @@ sync_directory() {
     
     # 复制到目标目录
     if [ -d "${TEMP_DIR}/${source_dir}" ]; then
-        # 备份当前配置（如果存在）
-        if [ -d "${target_dir}" ]; then
-            echo -e "${GREEN}备份当前配置 ${target_dir}...${NC}"
-            cp -r ${target_dir} ${target_dir}.backup.$(date +%Y%m%d_%H%M%S)
-        fi
-        
         mkdir -p "$(dirname "${target_dir}")"
         cp -r ${TEMP_DIR}/${source_dir}/* ${target_dir}/
         return 0
@@ -173,12 +132,6 @@ if [ $SYNC_FAILED -eq 1 ]; then
     echo -e "${RED}错误: 部分目录同步失败${NC}"
     exit 1
 fi
-
-# 清理旧备份
-for config in "${SYNC_CONFIGS[@]}"; do
-    IFS=':' read -r source_dir target_dir <<< "$config"
-    cleanup_old_backups "$target_dir"
-done
 
 # 显示变更
 echo -e "${GREEN}文件变更:${NC}"
