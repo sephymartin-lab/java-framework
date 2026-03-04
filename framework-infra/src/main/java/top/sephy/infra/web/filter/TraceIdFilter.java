@@ -27,6 +27,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import top.sephy.infra.consts.GlobalSystemConstants;
+import top.sephy.infra.utils.ThreadContextUtils;
 
 /**
  * 确保此过滤器在最前面
@@ -42,6 +43,7 @@ public class TraceIdFilter extends OncePerRequestFilter {
             if (StringUtils.isBlank(tid)) {
                 tid = GlobalIdGenerator.generate();
             }
+            ThreadContextUtils.setTraceId(tid);
             MDC.put(GlobalSystemConstants.TRACE_ID_NAME, tid);
         } finally {
             // 在响应头中添加 traceId
