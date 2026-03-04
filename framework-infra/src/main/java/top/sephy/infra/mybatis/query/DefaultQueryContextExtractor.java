@@ -35,8 +35,8 @@ public class DefaultQueryContextExtractor implements QueryContextExtractor {
 
     private boolean camelToUnderline = true;
 
-    private Map<String, Converter> converterMap = new HashMap<>();
-    private ConcurrentHashMap<Class<?>, QueryMetaInfo> cache = new ConcurrentHashMap<>();
+    private final Map<String, Converter> converterMap = new HashMap<>();
+    private final ConcurrentHashMap<Class<?>, QueryMetaInfo> cache = new ConcurrentHashMap<>();
 
     public DefaultQueryContextExtractor(boolean camelToUnderline) {
         this.camelToUnderline = camelToUnderline;

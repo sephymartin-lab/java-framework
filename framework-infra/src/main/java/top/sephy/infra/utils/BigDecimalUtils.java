@@ -28,6 +28,8 @@ import java.math.MathContext;
  */
 public abstract class BigDecimalUtils {
 
+    public static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+
     /**
      * 将 null 值转换为 BigDecimal.ZERO
      *
