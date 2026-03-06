@@ -107,14 +107,14 @@ public class DefaultQueryContextExtractor implements QueryContextExtractor {
                     op = queryCondition.operator();
                     ignoreNull = queryCondition.ignoreNull();
                     converter = queryCondition.converterStrategy();
+
+                    if (StringUtils.hasText(queryCondition.tableAlias())) {
+                        name = queryCondition.tableAlias() + "." + name;
+                    }
                 }
 
                 if (!nameSpecified && camelToUnderline) {
                     name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
-                }
-
-                if (StringUtils.hasText(queryCondition.tableAlias())) {
-                    name = queryCondition.tableAlias() + "." + name;
                 }
 
                 conditionMap.put(field.getName(), new $QueryCondition(name, op, converter, ignoreNull));
