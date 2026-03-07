@@ -1,0 +1,208 @@
+name: Maven Deploy to Nexus
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: '是否跳过测试'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  # notify-start:
+  #   name: 通知开始
+  #   runs-on: self-hosted
+  #   container:
+  #     image: python:3-alpine
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: 发送开始通知
+  #       env:
+  #         FEISHU_BOT_URL: ${{ secrets.FEISHU_BOT_URL }}
+  #         FEISHU_BOT_SECRET: ${{ secrets.FEISHU_BOT_SECRET }}
+  #         CI_REPO_NAME: ${{ github.repository }}
+  #         CI_PIPELINE_NUMBER: ${{ github.run_number }}
+  #         CI_COMMIT_SHA: ${{ github.sha }}
+  #         CI_COMMIT_BRANCH: ${{ github.ref_name }}
+  #         CI_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+  #         CI_PIPELINE_EVENT: ${{ github.event_name }}
+  #         CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  #       run: |
+  #         python3 scripts/ci/notify/notify_start.py
+  #       continue-on-error: true
+
+  maven-deploy:
+    name: Maven 部署
+    runs-on: self-hosted
+    # needs: notify-start
+    container:
+      image: maven:3.9.12-eclipse-temurin-25-noble
+      # 自托管 Runner 支持挂载宿主机目录
+      # 将宿主机的 .m2 目录挂载到容器，实现依赖缓存共享
+      volumes:
+        - ${{ github.workspace }}:/workspace
+        - /root/.m2:/root/.m2
+      options: --user root -w /workspace
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 调试信息：检查环境和挂载情况
+      - name: 🔍 调试 - 环境信息
+        run: |
+          echo "========================================="
+          echo "🐳 容器环境信息"
+          echo "========================================="
+          echo "当前用户: $(whoami)"
+          echo "工作目录: $(pwd)"
+          echo "Java 版本:"
+          java -version
+          echo ""
+          echo "Maven 版本:"
+          mvn -version
+          echo ""
+
+      - name: 🔍 调试 - .m2 目录挂载情况
+        run: |
+          echo "========================================="
+          echo "📁 .m2 目录挂载检查"
+          echo "========================================="
+
+          # 检查 .m2 目录是否存在
+          if [ -d "/root/.m2" ]; then
+            echo "✅ /root/.m2 目录存在"
+            echo ""
+            echo "📊 目录结构:"
+            ls -lah /root/.m2/ || echo "无法列出目录内容"
+            echo ""
+            
+            # 检查 settings.xml
+            if [ -f "/root/.m2/settings.xml" ]; then
+              echo "✅ settings.xml 文件存在"
+              echo ""
+              echo "📄 settings.xml 内容（隐藏密码）:"
+              sed 's/<password>.*<\/password>/<password>***<\/password>/g' /root/.m2/settings.xml || echo "无法读取 settings.xml"
+            else
+              echo "⚠️  settings.xml 文件不存在"
+              echo "请确保宿主机 /root/.m2/settings.xml 已配置"
+            fi
+            echo ""
+            
+            # 检查 repository 目录
+            if [ -d "/root/.m2/repository" ]; then
+              echo "✅ repository 目录存在"
+              echo "📊 缓存大小: $(du -sh /root/.m2/repository 2>/dev/null | cut -f1)"
+              echo "📦 缓存文件数: $(find /root/.m2/repository -type f 2>/dev/null | wc -l)"
+            else
+              echo "ℹ️  repository 目录不存在（首次构建会创建）"
+            fi
+          else
+            echo "❌ /root/.m2 目录不存在 - 挂载可能失败！"
+            exit 1
+          fi
+          echo "========================================="
+
+      - name: 🔍 调试 - Maven 有效配置
+        run: |
+          echo "========================================="
+          echo "⚙️  Maven 有效配置（包含 settings.xml）"
+          echo "========================================="
+          mvn help:effective-settings | grep -A 5 -B 2 "nexus" || echo "未找到 nexus 配置"
+          echo "========================================="
+
+      - name: 部署 framework-dependencies
+        working-directory: framework-dependencies
+        run: |
+          echo "========================================="
+          echo "🚀 开始部署 framework-dependencies"
+          echo "========================================="
+          mvn deploy -Dmaven.test.skip=${{ github.event.inputs.skip_tests || 'true' }} -B -X | tee /tmp/maven-deploy-deps.log || {
+            echo "❌ 部署失败，查看错误日志:"
+            tail -100 /tmp/maven-deploy-deps.log
+            exit 1
+          }
+          echo "✅ framework-dependencies 部署完成"
+
+      - name: 部署 framework-infra
+        working-directory: framework-infra
+        run: |
+          echo "========================================="
+          echo "🚀 开始部署 framework-infra"
+          echo "========================================="
+          mvn deploy -Dmaven.test.skip=${{ github.event.inputs.skip_tests || 'true' }} -B -X | tee /tmp/maven-deploy-infra.log || {
+            echo "❌ 部署失败，查看错误日志:"
+            tail -100 /tmp/maven-deploy-infra.log
+            exit 1
+          }
+          echo "✅ framework-infra 部署完成"
+
+      - name: 🔍 调试 - 部署后状态
+        if: always()
+        run: |
+          echo "========================================="
+          echo "📊 部署后统计信息"
+          echo "========================================="
+          echo "📦 Maven 本地仓库大小: $(du -sh /root/.m2/repository 2>/dev/null | cut -f1 || echo '未知')"
+          echo "📁 已部署的构件:"
+          find /root/.m2/repository/top/sephy -name "*.jar" -o -name "*.pom" 2>/dev/null | tail -20 || echo "未找到构件"
+          echo "========================================="
+
+  notify-success:
+    name: 通知成功
+    runs-on: self-hosted
+    needs: maven-deploy
+    if: success()
+    container:
+      image: python:3-alpine
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 发送成功通知
+        env:
+          FEISHU_BOT_URL: ${{ secrets.FEISHU_BOT_URL }}
+          FEISHU_BOT_SECRET: ${{ secrets.FEISHU_BOT_SECRET }}
+          CI_REPO_NAME: ${{ github.repository }}
+          CI_PIPELINE_NUMBER: ${{ github.run_number }}
+          CI_COMMIT_SHA: ${{ github.sha }}
+          CI_COMMIT_BRANCH: ${{ github.ref_name }}
+          CI_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          CI_PIPELINE_EVENT: ${{ github.event_name }}
+          CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CI_PIPELINE_STARTED: ${{ github.event.repository.pushed_at }}
+        run: |
+          python3 scripts/ci/notify/notify_complete.py success
+        continue-on-error: true
+
+  notify-failure:
+    name: 通知失败
+    runs-on: self-hosted
+    needs: maven-deploy
+    if: failure()
+    container:
+      image: python:3-alpine
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 发送失败通知
+        env:
+          FEISHU_BOT_URL: ${{ secrets.FEISHU_BOT_URL }}
+          FEISHU_BOT_SECRET: ${{ secrets.FEISHU_BOT_SECRET }}
+          CI_REPO_NAME: ${{ github.repository }}
+          CI_PIPELINE_NUMBER: ${{ github.run_number }}
+          CI_COMMIT_SHA: ${{ github.sha }}
+          CI_COMMIT_BRANCH: ${{ github.ref_name }}
+          CI_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          CI_PIPELINE_EVENT: ${{ github.event_name }}
+          CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CI_PIPELINE_STARTED: ${{ github.event.repository.pushed_at }}
+        run: |
+          python3 scripts/ci/notify/notify_complete.py failure
+        continue-on-error: true
