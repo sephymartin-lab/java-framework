@@ -40,6 +40,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.hashids</groupId>
             <artifactId>hashids</artifactId>
             <scope>provided</scope>

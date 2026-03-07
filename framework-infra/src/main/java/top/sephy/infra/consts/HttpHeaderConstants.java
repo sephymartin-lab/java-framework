@@ -136,4 +136,5 @@ public abstract class HttpHeaderConstants {
      * </p>
      */
     public static final String HEADER_BIZ_TYPE = "biz-type";
+
 }
