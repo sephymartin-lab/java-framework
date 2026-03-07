@@ -20,10 +20,15 @@
 
     <distributionManagement>
         <repository>
-            <id>nexus-snapshot</id>
-            <name>nexus-snapshot</name>
-            <url>http://nexus.sephy.top/repository/maven-snapshots/</url>
-        </repository>
+            <id>sephy-maven-releases</id>
+            <name>sephy-maven-releases</name>
+            <url>https://maven.sephy.top/releases/</url>
+          </repository>
+        <snapshotRepository>
+            <id>sephy-maven-snapshots</id>
+            <name>sephy-maven-snapshots</name>
+            <url>https://maven.sephy.top/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <properties>
