@@ -13,6 +13,10 @@
 
     <artifactId>framework-infra</artifactId>
 
+    <properties>
+        <style.folder>${basedir}/../style</style.folder>
+    </properties>
+
     <dependencies>
 
         <dependency>

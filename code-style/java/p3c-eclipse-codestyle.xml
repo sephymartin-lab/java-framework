@@ -393,7 +393,7 @@
         
         <!--comment start-->
         <setting id="org.eclipse.jdt.core.formatter.comment.line_length" value="120"/>
-        <!--关闭 JavaDoc 注释格式化，防止方法上的多行 JavaDoc 注释被合并 -->
+        <!--ENABLE_JAVADOC_FORMATTING-->
         <setting id="org.eclipse.jdt.core.formatter.comment.format_javadoc_comments" value="false"/>
         <!--org.eclipse.jdt.core.formatter.comment.clear_blank_lines_in_javadoc_comment=<Programmatic>-->
         <setting id="org.eclipse.jdt.core.formatter.comment.clear_blank_lines_in_javadoc_comment" value="false"/>
@@ -422,14 +422,12 @@
         
         <setting id="org.eclipse.jdt.core.formatter.format_line_comment_starting_on_first_column" value="true"/>
         <setting id="org.eclipse.jdt.core.formatter.comment.format_line_comments" value="true"/>
-        <!--关闭文件头部注释格式化，防止 Apache License 等多行注释被合并成单行 -->
         <setting id="org.eclipse.jdt.core.formatter.comment.format_header" value="false"/>
         <setting id="org.eclipse.jdt.core.formatter.comment.new_lines_at_javadoc_boundaries" value="true"/>
         
         <setting id="org.eclipse.jdt.core.formatter.comment.format_source_code" value="true"/>
         <setting id="org.eclipse.jdt.core.formatter.comment.format_html" value="true"/>
-
-        <!-- 多行注释不做合并 -->
+        
         <setting id="org.eclipse.jdt.core.formatter.join_lines_in_comments" value="false"/>
         <!--和IDEA保持一致，注释换行-->
         <setting id="org.eclipse.jdt.core.formatter.comment.indent_parameter_description" value="true"/>
@@ -541,8 +539,7 @@
             value="common_lines"/>
         <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_if_while_statement" value="common_lines"/>
         <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_catch_clause" value="common_lines"/>
-        <!--注解参数换行策略：next_line 表示当注解参数较长时更容易换行，实现更短的行长度效果 -->
-        <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_annotation" value="next_line"/>
+        <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_annotation" value="common_lines"/>
         <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_try_clause" value="common_lines"/>
         <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_method_delcaration" value="common_lines"/>
         <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_lambda_declaration" value="common_lines"/>
@@ -570,7 +567,7 @@
         <setting id="org.eclipse.jdt.core.formatter.align_type_members_on_columns" value="false"/>
         <!--Java:<Programmatic>-->
         <setting id="org.eclipse.jdt.core.formatter.number_of_empty_lines_to_preserve" value="1"/>
-        <!--防止已换行的代码被合并，保留开发者的手动换行 -->
+        <!-- 禁止合并已换行的行，防止注释被重新合并或换行 -->
         <setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="false"/>
         
         <!--统一为end_of_lint，IDEA默认一致-->

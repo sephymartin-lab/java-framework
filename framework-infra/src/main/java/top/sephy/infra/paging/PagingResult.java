@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -128,7 +128,7 @@ public class PagingResult<T> implements Iterable<T> {
      * @return 分页结果
      */
     public static <T> PagingResult<T> from(IPage<T> page) {
-        return new PagingResult<>(page.getRecords(), (int) page.getCurrent(), (int) page.getSize(), page.getTotal());
+        return new PagingResult<>(page.getRecords(), (int)page.getCurrent(), (int)page.getSize(), page.getTotal());
     }
 
     /**
@@ -144,7 +144,7 @@ public class PagingResult<T> implements Iterable<T> {
         List<T> list = page.getRecords().stream()
             .map(converter)
             .collect(Collectors.toList());
-        return new PagingResult<>(list, (int) page.getCurrent(), (int) page.getSize(), page.getTotal());
+        return new PagingResult<>(list, (int)page.getCurrent(), (int)page.getSize(), page.getTotal());
     }
 
     /**
@@ -157,7 +157,7 @@ public class PagingResult<T> implements Iterable<T> {
      * @return 分页结果
      */
     public static <S, T> PagingResult<T> from(IPage<S> page, List<T> convertedList) {
-        return new PagingResult<>(convertedList, (int) page.getCurrent(), (int) page.getSize(), page.getTotal());
+        return new PagingResult<>(convertedList, (int)page.getCurrent(), (int)page.getSize(), page.getTotal());
     }
 
     /**

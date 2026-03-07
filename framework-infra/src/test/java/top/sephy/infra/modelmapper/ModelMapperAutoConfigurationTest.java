@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,8 +89,7 @@ class ModelMapperAutoConfigurationTest {
         void listConversionShouldWork() {
             List<UserDO> userDOs = Arrays.asList(
                 new UserDO(1L, "张三", "zhangsan@example.com", 25),
-                new UserDO(2L, "李四", "lisi@example.com", 30)
-            );
+                new UserDO(2L, "李四", "lisi@example.com", 30));
 
             List<UserDTO> userDTOs = beanConverter.convertList(userDOs, UserDTO.class);
 
@@ -128,8 +127,7 @@ class ModelMapperAutoConfigurationTest {
 
         @Configuration
         @EnableAutoConfiguration
-        static class TestConfig {
-        }
+        static class TestConfig {}
     }
 
     /**
@@ -159,8 +157,7 @@ class ModelMapperAutoConfigurationTest {
 
         @Configuration
         @EnableAutoConfiguration
-        static class TestConfig {
-        }
+        static class TestConfig {}
     }
 
     /**
@@ -246,8 +243,7 @@ class ModelMapperAutoConfigurationTest {
 
         @Configuration
         @EnableAutoConfiguration
-        static class TestConfig {
-        }
+        static class TestConfig {}
     }
 
     /**
@@ -323,8 +319,7 @@ class ModelMapperAutoConfigurationTest {
 
         @Configuration
         @EnableAutoConfiguration
-        static class TestConfig {
-        }
+        static class TestConfig {}
     }
 
     /**
@@ -352,8 +347,7 @@ class ModelMapperAutoConfigurationTest {
 
         @Configuration
         @EnableAutoConfiguration
-        static class TestConfig {
-        }
+        static class TestConfig {}
     }
 
     // ==================== 测试用 DTO/DO 类 ====================
