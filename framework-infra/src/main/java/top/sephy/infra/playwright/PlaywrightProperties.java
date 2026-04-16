@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,6 +40,13 @@ public class PlaywrightProperties implements InitializingBean {
     private int maxConcurrentInstance = 5;
 
     private String mode = "standard";
+
+    /**
+     * 是否启用 Browser 复用（默认 true）
+     * 启用后，Browser 实例会被复用，每次只创建新的 BrowserContext
+     * 这样可以大幅提升性能，同时保持会话隔离
+     */
+    private boolean browserReuseEnabled = true;
 
     private List<String> initScripts;
 

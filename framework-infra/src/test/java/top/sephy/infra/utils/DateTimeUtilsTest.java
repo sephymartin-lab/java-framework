@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,16 +41,16 @@ class DateTimeUtilsTest {
     @AllArgsConstructor
     public static class LocalDateTimeWithZone {
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "GMT+8")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "GMT+8")
         private Date date1;
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "Asia/Shanghai")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "Asia/Shanghai")
         private Date date2;
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "GMT+8")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "GMT+8")
         private LocalDate ld1;
 
-        @JsonFormat(pattern = DateTimeUtils.PATTERN_DATE, timezone = "Asia/Shanghai")
+        @JsonFormat(pattern = DateTimeUtils.PATTERN_YYYY_MM_DD, timezone = "Asia/Shanghai")
         private LocalDate ld2;
     }
 }

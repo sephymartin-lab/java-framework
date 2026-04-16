@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ import top.sephy.infra.utils.SpELUtils;
  * <p>
  * <b>AOP 执行顺序说明：</b>
  * <ul>
- *   <li>Order 值越小，优先级越高</li>
- *   <li>默认 Order = Integer.MAX_VALUE（最低优先级）</li>
- *   <li>建议的顺序：日志追踪(100) > 分布式锁(200) > 事务(300) > 业务逻辑</li>
+ * <li>Order 值越小，优先级越高</li>
+ * <li>默认 Order = Integer.MAX_VALUE（最低优先级）</li>
+ * <li>建议的顺序：日志追踪(100) > 分布式锁(200) > 事务(300) > 业务逻辑</li>
  * </ul>
  * <p>
  * 当前优先级：{@link AopOrderConstants#LOG_KEYWORD}（较高优先级，确保在其他切面之前设置 MDC）
@@ -103,8 +103,7 @@ public class LogKeywordAspect {
                     }
 
                 } catch (Exception e) {
-                    log.warn("处理 LogKeyword 注解时发生异常，keyword: {}, spel: {}", logKeyword.keyword(),
-                        logKeyword.spel(), e);
+                    log.warn("处理 LogKeyword 注解时发生异常，keyword: {}, spel: {}", logKeyword.keyword(), logKeyword.spel(), e);
                 }
             }
 
@@ -143,4 +142,3 @@ public class LogKeywordAspect {
         return new LogKeyword[0];
     }
 }
-

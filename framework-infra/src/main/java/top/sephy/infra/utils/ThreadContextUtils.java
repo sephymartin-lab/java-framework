@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,6 +44,14 @@ public abstract class ThreadContextUtils {
         getContext().setUsername(username);
     }
 
+    public static String getTraceId() {
+        return getContext().getTraceId();
+    }
+
+    public static void setTraceId(String traceId) {
+        getContext().setTraceId(traceId);
+    }
+
     private static ThreadContext getContext() {
         ThreadContext context = INSTANCE.get();
         if (context == null) {
@@ -63,5 +71,7 @@ public abstract class ThreadContextUtils {
         private Object userId;
 
         private String username;
+
+        private String traceId;
     }
 }

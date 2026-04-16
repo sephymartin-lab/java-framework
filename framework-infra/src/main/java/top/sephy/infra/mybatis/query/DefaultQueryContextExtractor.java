@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,8 +35,8 @@ public class DefaultQueryContextExtractor implements QueryContextExtractor {
 
     private boolean camelToUnderline = true;
 
-    private Map<String, Converter> converterMap = new HashMap<>();
-    private ConcurrentHashMap<Class<?>, QueryMetaInfo> cache = new ConcurrentHashMap<>();
+    private final Map<String, Converter> converterMap = new HashMap<>();
+    private final ConcurrentHashMap<Class<?>, QueryMetaInfo> cache = new ConcurrentHashMap<>();
 
     public DefaultQueryContextExtractor(boolean camelToUnderline) {
         this.camelToUnderline = camelToUnderline;
@@ -107,14 +107,14 @@ public class DefaultQueryContextExtractor implements QueryContextExtractor {
                     op = queryCondition.operator();
                     ignoreNull = queryCondition.ignoreNull();
                     converter = queryCondition.converterStrategy();
+
+                    if (StringUtils.hasText(queryCondition.tableAlias())) {
+                        name = queryCondition.tableAlias() + "." + name;
+                    }
                 }
 
                 if (!nameSpecified && camelToUnderline) {
                     name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
-                }
-
-                if (StringUtils.hasText(queryCondition.tableAlias())) {
-                    name = queryCondition.tableAlias() + "." + name;
                 }
 
                 conditionMap.put(field.getName(), new $QueryCondition(name, op, converter, ignoreNull));

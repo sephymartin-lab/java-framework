@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,15 @@
  */
 package top.sephy.infra.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Hex;
 
 import top.sephy.infra.exception.SystemException;
 
@@ -54,6 +60,43 @@ public abstract class SignatureUtils {
             return signature.verify(signatureData);
         } catch (Exception ex) {
             throw new SystemException("验签失败", ex);
+        }
+    }
+
+    /**
+     * 计算 HMAC-SHA256 签名
+     *
+     * @param data 待签名的数据
+     * @param secretKey 密钥
+     * @return 十六进制编码的签名字符串
+     * @throws SystemException 签名失败时抛出
+     */
+    public static final String hmacSha256(String data, String secretKey) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            mac.init(secretKeySpec);
+            byte[] hash = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return Hex.encodeHexString(hash);
+        } catch (Exception ex) {
+            throw new SystemException("HMAC-SHA256签名失败", ex);
+        }
+    }
+
+    /**
+     * 验证 HMAC-SHA256 签名
+     *
+     * @param data 原始数据
+     * @param signature 待验证的签名（十六进制编码）
+     * @param secretKey 密钥
+     * @return true 如果签名验证通过，false 否则
+     */
+    public static final boolean hmacSha256Verify(String data, String signature, String secretKey) {
+        try {
+            String calculatedSignature = hmacSha256(data, secretKey);
+            return calculatedSignature.equalsIgnoreCase(signature);
+        } catch (Exception ex) {
+            return false;
         }
     }
 }

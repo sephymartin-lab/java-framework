@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 
@@ -40,6 +41,8 @@ public class PlaywrightWorkerEngine implements InitializingBean, DisposableBean 
     private final PlaywrightProperties playwrightProperties;
 
     private Semaphore semaphore;
+
+    private BrowserPoolManager browserPoolManager;
 
     private static final String MODE_POOL = "pool";
 
@@ -64,7 +67,13 @@ public class PlaywrightWorkerEngine implements InitializingBean, DisposableBean 
             Playwright playwright = null;
             try {
                 playwright = playwrightObjectPool.borrowObject();
-                return worker.doWithPlaywright(playwright, playwrightProperties);
+                // 如果启用了 Browser 复用，设置 Playwright 实例到 BrowserPoolManager
+                if (playwrightProperties.isBrowserReuseEnabled() && browserPoolManager != null) {
+                    browserPoolManager.setPlaywright(playwright);
+                    return worker.doWithPlaywright(playwright, playwrightProperties, browserPoolManager);
+                } else {
+                    return worker.doWithPlaywright(playwright, playwrightProperties);
+                }
             } catch (Exception e) {
                 throw new PlaywrightException("Execute failed.", e);
             } finally {
@@ -75,7 +84,13 @@ public class PlaywrightWorkerEngine implements InitializingBean, DisposableBean 
         } else {
             semaphore.acquire();
             try (Playwright playwright = Playwright.create(playwrightProperties.getCreateOptions());) {
-                return worker.doWithPlaywright(playwright, playwrightProperties);
+                // 如果启用了 Browser 复用，设置 Playwright 实例到 BrowserPoolManager
+                if (playwrightProperties.isBrowserReuseEnabled() && browserPoolManager != null) {
+                    browserPoolManager.setPlaywright(playwright);
+                    return worker.doWithPlaywright(playwright, playwrightProperties, browserPoolManager);
+                } else {
+                    return worker.doWithPlaywright(playwright, playwrightProperties);
+                }
             } finally {
                 semaphore.release();
             }
@@ -92,8 +107,19 @@ public class PlaywrightWorkerEngine implements InitializingBean, DisposableBean 
             poolConfig.setMaxTotal(playwrightProperties.getMaxConcurrentInstance());
             playwrightObjectPool = new GenericObjectPool<>(
                 new PlaywrightObjectFactory(playwrightProperties.getCreateOptions()), poolConfig);
+
+            // 如果启用了 Browser 复用，创建 BrowserPoolManager
+            if (playwrightProperties.isBrowserReuseEnabled()) {
+                browserPoolManager = new BrowserPoolManager(playwrightProperties);
+                log.info("Browser reuse enabled, BrowserPoolManager created (will be initialized on first use)");
+            }
         } else {
             semaphore = new Semaphore(playwrightProperties.getMaxConcurrentInstance());
+            // standard 模式也可以使用 Browser 复用
+            if (playwrightProperties.isBrowserReuseEnabled()) {
+                browserPoolManager = new BrowserPoolManager(playwrightProperties);
+                log.info("Browser reuse enabled for standard mode, BrowserPoolManager created");
+            }
         }
     }
 
@@ -102,5 +128,17 @@ public class PlaywrightWorkerEngine implements InitializingBean, DisposableBean 
         if (MODE_POOL.equalsIgnoreCase(playwrightProperties.getMode())) {
             playwrightObjectPool.close();
         }
+        if (browserPoolManager != null) {
+            browserPoolManager.destroy();
+        }
+    }
+
+    /**
+     * 获取 BrowserPoolManager（用于监控）
+     *
+     * @return BrowserPoolManager 实例，如果未启用 Browser 复用则返回 null
+     */
+    public BrowserPoolManager getBrowserPoolManager() {
+        return browserPoolManager;
     }
 }

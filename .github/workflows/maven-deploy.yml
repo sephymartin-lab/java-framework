@@ -1,0 +1,352 @@
+name: Maven Deploy to Nexus
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: '是否跳过测试'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+      enable_debug:
+        description: '是否启用调试模式'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  deploy:
+    name: 部署到 Nexus 私服
+    runs-on: self-hosted
+    steps:
+      - name: 记录开始时间
+        id: start_time
+        run: |
+          echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+          echo "START_TIME_DISPLAY=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          # cache: 'maven'
+          # settings-path: .github/workflows/settings.xml
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.12
+
+      - name: Create Maven settings.xml
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            
+            <localRepository>/root/.m2/repository</localRepository>
+            
+            <servers>
+              <server>
+                <id>sephy-maven-releases</id>
+                <username>${{ secrets.MAVEN_USERNAME }}</username>
+                <password>${{ secrets.MAVEN_PASSWORD }}</password>
+              </server>
+              <server>
+                <id>sephy-maven-snapshots</id>
+                <username>${{ secrets.MAVEN_USERNAME }}</username>
+                <password>${{ secrets.MAVEN_PASSWORD }}</password>
+              </server>
+            </servers>
+            
+            <profiles>
+              <profile>
+                <id>sephy</id>
+                <properties>
+                  <altReleaseDeploymentRepository>
+                    sephy-maven-releases::default::https://maven.sephy.top/releases/
+                  </altReleaseDeploymentRepository>
+                  <altSnapshotDeploymentRepository>
+                    sephy-maven-snapshots::default::https://maven.sephy.top/snapshots/
+                  </altSnapshotDeploymentRepository>
+                </properties>
+                <repositories>
+                  <repository>
+                    <id>sephy-maven-releases</id>
+                    <url>https://maven.sephy.top/releases/</url>
+                    <releases>
+                      <enabled>true</enabled>
+                    </releases>
+                  </repository>
+                  <repository>
+                    <id>sephy-maven-snapshots</id>
+                    <url>https://maven.sephy.top/snapshots/</url>
+                    <snapshots>
+                      <enabled>true</enabled>
+                      <updatePolicy>always</updatePolicy>
+                      <checksumPolicy>warn</checksumPolicy>
+                    </snapshots>
+                  </repository>
+                </repositories>
+                <pluginRepositories>
+                  <pluginRepository>
+                    <id>sephy-maven-releases</id>
+                    <url>https://maven.sephy.top/releases/</url>
+                  </pluginRepository>
+                  <pluginRepository>
+                    <id>sephy-maven-snapshots</id>
+                    <url>https://maven.sephy.top/snapshots/</url>
+                    <snapshots>
+                      <enabled>true</enabled>
+                    </snapshots>
+                  </pluginRepository>
+                </pluginRepositories>
+              </profile>
+            </profiles>
+            
+            <activeProfiles>
+              <activeProfile>sephy</activeProfile>
+            </activeProfiles>
+          </settings>
+          EOF
+
+      - name: 🔍 调试 - 环境信息检查
+        if: github.event.inputs.enable_debug == 'true'
+        run: |
+          echo "========================================="
+          echo "🐳 容器环境信息"
+          echo "========================================="
+          echo "当前用户: $(whoami)"
+          echo "工作目录: $(pwd)"
+          echo ""
+
+          echo "📌 Java 环境:"
+          java -version
+          echo "JAVA_HOME: ${JAVA_HOME:-未设置}"
+          echo "Java 可执行文件: $(which java)"
+          echo ""
+
+          echo "📌 Maven 环境:"
+          mvn -version
+          echo ""
+
+          echo "========================================="
+          echo "📁 Maven 配置检查"
+          echo "========================================="
+          if [ -d "/root/.m2" ]; then
+            echo "✅ /root/.m2 目录存在"
+            ls -lah /root/.m2/ 2>/dev/null || echo "无法列出目录内容"
+            echo ""
+            
+            if [ -f "/root/.m2/settings.xml" ]; then
+              echo "✅ settings.xml 存在"
+              echo "Maven 有效配置（Nexus 相关）:"
+              mvn help:effective-settings | grep -A 5 -B 2 "nexus" || echo "未找到 nexus 配置"
+            else
+              echo "⚠️  settings.xml 不存在"
+            fi
+            echo ""
+            
+            if [ -d "/root/.m2/repository" ]; then
+              echo "✅ Maven 本地仓库存在"
+              echo "缓存大小: $(du -sh /root/.m2/repository 2>/dev/null | cut -f1 || echo '未知')"
+            else
+              echo "ℹ️  Maven 本地仓库不存在（首次构建会创建）"
+            fi
+          else
+            echo "❌ /root/.m2 目录不存在 - 挂载失败！"
+            exit 1
+          fi
+          echo "========================================="
+
+      - name: 部署 framework-dependencies
+        working-directory: framework-dependencies
+        run: |
+          echo "========================================="
+          echo "🚀 开始部署 framework-dependencies"
+          echo "========================================="
+
+          # 根据 enable_debug 参数决定是否添加 -X
+          DEBUG_FLAG=""
+          if [ "${{ github.event.inputs.enable_debug }}" = "true" ]; then
+            DEBUG_FLAG="-X"
+            echo "🐛 调试模式已启用"
+          fi
+
+          mvn deploy \
+            -DaltDeploymentRepository=releases::default::https://maven.sephy.top/releases/ \
+            -DaltDeploymentRepository=snapshots::default::https://maven.sephy.top/snapshots/ \
+            -Dmaven.test.skip=${{ github.event.inputs.skip_tests || 'true' }} \
+            -B $DEBUG_FLAG | tee /tmp/maven-deploy-deps.log || {
+              echo "❌ 部署失败，查看错误日志:"
+              tail -100 /tmp/maven-deploy-deps.log
+              exit 1
+            }
+          echo "✅ framework-dependencies 部署完成"
+
+      - name: 部署 framework-infra
+        working-directory: framework-infra
+        run: |
+          echo "========================================="
+          echo "🚀 开始部署 framework-infra"
+          echo "========================================="
+
+          # 根据 enable_debug 参数决定是否添加 -X
+          DEBUG_FLAG=""
+          if [ "${{ github.event.inputs.enable_debug }}" = "true" ]; then
+            DEBUG_FLAG="-X"
+            echo "🐛 调试模式已启用"
+          fi
+
+          mvn deploy \
+            -DaltDeploymentRepository=releases::default::https://maven.sephy.top/releases/ \
+            -DaltDeploymentRepository=snapshots::default::https://maven.sephy.top/snapshots/ \
+            -Dmaven.test.skip=${{ github.event.inputs.skip_tests || 'true' }} \
+            -B $DEBUG_FLAG | tee /tmp/maven-deploy-infra.log || {
+              echo "❌ 部署失败，查看错误日志:"
+              tail -100 /tmp/maven-deploy-infra.log
+              exit 1
+            }
+          echo "✅ framework-infra 部署完成"
+
+      - name: 发送飞书通知
+        if: always()
+        run: |
+          # 计算执行时长
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          DURATION_MIN=$((DURATION / 60))
+          DURATION_SEC=$((DURATION % 60))
+
+          # 判断执行结果
+          if [ "${{ job.status }}" == "success" ]; then
+            STATUS_TEXT="成功"
+            STATUS_COLOR="green"
+          else
+            STATUS_TEXT="失败"
+            STATUS_COLOR="red"
+          fi
+
+          # 获取触发人信息
+          TRIGGER_USER="${{ github.actor }}"
+
+          # 构建飞书消息卡片 JSON
+          CARD_JSON=$(cat <<EOF
+          {
+            "msg_type": "interactive",
+            "card": {
+              "header": {
+                "title": {
+                  "content": "GitHub Action 执行结果: ${STATUS_TEXT}",
+                  "tag": "plain_text"
+                },
+                "template": "${STATUS_COLOR}"
+              },
+              "elements": [
+                {
+                  "tag": "div",
+                  "fields": [
+                    {
+                      "is_short": true,
+                      "text": {
+                        "tag": "lark_md",
+                        "content": "**仓库信息:**\n${{ github.repository }}"
+                      }
+                    },
+                    {
+                      "is_short": true,
+                      "text": {
+                        "tag": "lark_md",
+                        "content": "**触发事件:**\n${{ github.event_name }}"
+                      }
+                    },
+                    {
+                      "is_short": true,
+                      "text": {
+                        "tag": "lark_md",
+                        "content": "**触发分支:**\n${{ github.ref_name }}"
+                      }
+                    },
+                    {
+                      "is_short": true,
+                      "text": {
+                        "tag": "lark_md",
+                        "content": "**触发人:**\n${TRIGGER_USER}"
+                      }
+                    },
+                    {
+                      "is_short": true,
+                      "text": {
+                        "tag": "lark_md",
+                        "content": "**触发时间:**\n${START_TIME_DISPLAY}"
+                      }
+                    },
+                    {
+                      "is_short": true,
+                      "text": {
+                        "tag": "lark_md",
+                        "content": "**执行时长:**\n${DURATION_MIN}分${DURATION_SEC}秒"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "tag": "action",
+                  "actions": [
+                    {
+                      "tag": "button",
+                      "text": {
+                        "tag": "plain_text",
+                        "content": "查看详细日志"
+                      },
+                      "type": "primary",
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          EOF
+          )
+
+          # 发送飞书通知（支持签名校验）
+          WEBHOOK_URL="${{ secrets.FEISHU_WEBHOOK_URL }}"
+
+          # 如果配置了签名密钥，则添加签名
+          if [ -n "${{ secrets.FEISHU_WEBHOOK_SECRET }}" ]; then
+            # 生成时间戳（秒级）
+            TIMESTAMP=$(date +%s)
+            
+            # 计算签名：SHA256(timestamp + "\n" + secret)
+            SIGN_STRING="${TIMESTAMP}\n${{ secrets.FEISHU_WEBHOOK_SECRET }}"
+            SIGNATURE=$(echo -n -e "${SIGN_STRING}" | openssl dgst -sha256 -binary | base64)
+            
+            echo "使用签名校验发送飞书通知"
+            echo "时间戳: ${TIMESTAMP}"
+            
+            # 在消息 JSON 中添加签名字段
+            CARD_JSON_WITH_SIGN=$(echo "${CARD_JSON}" | jq -c ". + {\"timestamp\": \"${TIMESTAMP}\", \"sign\": \"${SIGNATURE}\"}")
+            
+            curl -X POST "${WEBHOOK_URL}" \
+              -H 'Content-Type: application/json' \
+              -d "${CARD_JSON_WITH_SIGN}"
+          else
+            echo "发送飞书通知（无签名校验）"
+            curl -X POST "${WEBHOOK_URL}" \
+              -H 'Content-Type: application/json' \
+              -d "${CARD_JSON}"
+          fi

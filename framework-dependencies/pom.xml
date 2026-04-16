@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.1</version>
+        <version>4.0.5</version>
         <!-- lookup parent from repository -->
         <relativePath/>
     </parent>
@@ -20,10 +20,15 @@
 
     <distributionManagement>
         <repository>
-            <id>nexus-snapshot</id>
-            <name>nexus-snapshot</name>
-            <url>http://nexus.sephy.top/repository/maven-snapshots/</url>
-        </repository>
+            <id>sephy-maven-releases</id>
+            <name>sephy-maven-releases</name>
+            <url>https://maven.sephy.top/releases/</url>
+          </repository>
+        <snapshotRepository>
+            <id>sephy-maven-snapshots</id>
+            <name>sephy-maven-snapshots</name>
+            <url>https://maven.sephy.top/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <properties>
@@ -72,7 +77,6 @@
         <jsch.version>0.1.55</jsch.version>
         <jsoup.version>1.11.3</jsoup.version>
 
-
         <knife4j.version>4.5.0</knife4j.version>
         <!-- @formatter:off -->
         <knife4j-openapi3-jakarta-spring-boot-starter.version>${knife4j.version}</knife4j-openapi3-jakarta-spring-boot-starter.version>
@@ -87,6 +91,7 @@
         <m3u8-parser.version>0.22</m3u8-parser.version>
         <mapper-spring-boot-starter.version>2.1.5</mapper-spring-boot-starter.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
+        <modelmapper.version>3.2.0</modelmapper.version>
         <mapstruct-plus.version>1.4.3</mapstruct-plus.version>
         <mapstruct-spring-annotations.version>1.0.0</mapstruct-spring-annotations.version>
         <mapstruct-spring-extensions.version>1.0.0</mapstruct-spring-extensions.version>
@@ -94,17 +99,17 @@
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <maven.compiler.release>25</maven.compiler.release>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <mybatis-spring-boot-starter.version>3.0.3</mybatis-spring-boot-starter.version>
-        <mybatis.version>3.5.15</mybatis.version>
-        <mybatis-plus.version>3.5.14</mybatis-plus.version>
+        <mybatis-spring-boot-starter.version>3.0.5</mybatis-spring-boot-starter.version>
+        <mybatis.version>3.5.19</mybatis.version>
+        <mybatis-plus.version>3.5.16</mybatis-plus.version>
         <mybatis-plus-boot-starter.version>${mybatis-plus.version}</mybatis-plus-boot-starter.version>
         <mybatis-table-modify-mysql-boot-starter.version>1.5.3</mybatis-table-modify-mysql-boot-starter.version>
         <mysql.version>8.0.26</mysql.version>
         <mysql-connector-java.version>8.0.26</mysql-connector-java.version>
 
-        <pagehelper.version>6.1.0</pagehelper.version>
-        <pagehelper-spring-boot-starter.version>2.1.0-springboot4-SNAPSHOT</pagehelper-spring-boot-starter.version>
-        <playwright.version>1.51.0</playwright.version>
+        <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
+
+        <playwright.version>1.57.0</playwright.version>
         <poi.version>4.1.2</poi.version>
 
         <redisson.version>3.47.0</redisson.version>
@@ -115,13 +120,16 @@
         <shardingsphere.version>5.4.1</shardingsphere.version>
         <skywalking.version>8.8.1</skywalking.version>
         <snakeyaml-version>2.0.0</snakeyaml-version>
-        <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>2.44.5</spotless-maven-plugin.version>
         <spring-boot-admin.version>3.4.1</spring-boot-admin.version>
-        <springdoc-openapi.version>2.8.6</springdoc-openapi.version>
-        <!-- todo replace with ${maven.multiModuleProjectDirectory} -->
-        <style.folder>${session.executionRootDirectory}/style</style.folder>
-        <eclipse-code-formatter.version>4.26</eclipse-code-formatter.version>
-        <swagger-project-jakarta.version>2.2.8</swagger-project-jakarta.version>
+        <spring-cloud.version>2025.0.1</spring-cloud.version>
+        <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
+        <!-- Spotless 配置文件目录，使用项目本地 style 目录 -->
+        <!-- 使用 maven.multiModuleProjectDirectory 指向多模块项目根目录，如果未定义则回退到 project.basedir -->
+        <style.folder>${maven.multiModuleProjectDirectory}/style</style.folder>
+        <eclipse-code-formatter.version>4.35</eclipse-code-formatter.version>
+        <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+        <swagger-project-jakarta.version>2.2.41</swagger-project-jakarta.version>
 
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
         <weixin-java.version>4.5.0</weixin-java.version>
@@ -138,14 +146,23 @@
         <!-- 仅排除重复代码检测 按文件名匹配（如 *DTO.java, *VO.java） -->
         <sonar.cdp.exclusions>**/*DTO.java, **/*VO.java, **/*DO.java, **/*Entity.java</sonar.cdp.exclusions>
         <!-- https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/analysis-parameters/ -->
-        <cleanthat.version>2.12</cleanthat.version>
-        <mybatis-plus-spring-boot4-starter.version>3.5.16</mybatis-plus-spring-boot4-starter.version>
-        <mybatis-spring-boot.version>4.0.1</mybatis-spring-boot.version>
+        <cleanthat.version>2.24</cleanthat.version>
+        <mybatis-plus-spring-boot3-starter.version>3.5.16</mybatis-plus-spring-boot3-starter.version>
+        <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
         <smart-doc-maven-plugin.version>3.0.5</smart-doc-maven-plugin.version>
+        <scalar-webmvc.version>0.5.57</scalar-webmvc.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.dromara.dynamictp</groupId>
@@ -224,12 +241,32 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-scalar</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.scalar.maven</groupId>
+                <artifactId>scalar-webmvc</artifactId>
+                <version>${scalar-webmvc.version}</version>
+            </dependency>
+
+            <!--
+            <dependency>
                 <groupId>org.camunda.bpm</groupId>
                 <artifactId>camunda-bom</artifactId>
                 <version>${camunda.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+            -->
 
             <!-- shardingsphere -->
             <!--
@@ -301,6 +338,11 @@
                 <version>${mapstruct.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.modelmapper</groupId>
+                <artifactId>modelmapper</artifactId>
+                <version>${modelmapper.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-valueHandler</artifactId>
                 <version>${mapstruct.version}</version>
@@ -367,25 +409,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper</artifactId>
-                <version>${pagehelper.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper-spring-boot-starter</artifactId>
-                <version>${pagehelper-spring-boot-starter.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-starter-jdbc</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.mybatis.spring.boot</groupId>
-                        <artifactId>mybatis-spring-boot-starter</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
             </dependency>
 
             <dependency>
@@ -421,6 +447,12 @@
                         <artifactId>jsqlparser</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-extension</artifactId>
+                <version>${mybatis-plus.version}</version>
             </dependency>
 
             <dependency>
@@ -786,6 +818,14 @@
                     </executions>
                 </plugin>
 
+                <!-- maven-antrun-plugin 保留插件定义，但不再用于下载 Spotless 配置 -->
+                <!-- 现在直接使用项目本地 style 目录中的配置文件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven-antrun-plugin.version}</version>
+                </plugin>
+
                 <!-- https://shardingsphere.apache.org/blog/cn/material/spotless/ -->
                 <!-- https://github.com/diffplug/spotless/tree/main/plugin-maven -->
                 <plugin>
@@ -793,6 +833,9 @@
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${spotless-maven-plugin.version}</version>
                     <configuration>
+                        <upToDateChecking>
+                            <enabled>true</enabled>
+                        </upToDateChecking>
                         <formats>
                             <!-- you can define as many formats as you want, each is independent -->
                             <format>
@@ -879,19 +922,15 @@
                             <sortPom>
                                 <expandEmptyElements>false</expandEmptyElements>
                                 <nrOfIndentSpace>4</nrOfIndentSpace>
-                                <indentSchemaLocation>true</indentSchemaLocation>
+                                <indentAttribute>schemaLocation</indentAttribute>
                             </sortPom>
                             <!-- has its own section below -->
                         </pom>
                     </configuration>
                     <executions>
-                        <!-- 在构建时自动格式化 -->
-                        <execution>
-                            <id>apply</id>
-                            <goals>
-                                <goal>apply</goal>
-                            </goals>
-                        </execution>
+                        <!-- Spotless 格式化执行 -->
+                        <!-- 通过 mvn spotless:apply 显式执行 -->
+                        <!-- 现在直接使用项目本地 style 目录中的配置文件，无需下载 -->
 
                         <!--
                         <execution>
@@ -960,6 +999,11 @@
                         <phase>compile</phase>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
 
             <plugin>

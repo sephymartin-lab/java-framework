@@ -1,0 +1,86 @@
+steps:
+  - name: notify-start
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+    commands:
+      - python3 scripts/ci/notify/notify_start.py
+    when:
+      - event: [push, pull_request]
+    failure: ignore
+
+  - name: spotless-check
+    image: maven:3.9.12-eclipse-temurin-25-noble
+    commands:
+      - bash scripts/ci/spotless/cleanup_failure_files.sh
+      - bash scripts/ci/spotless/check_all_modules.sh
+    when:
+      - event: [push]
+    failure: ignore
+
+  - name: spotless-notify
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+      # DevOps API 配置（推荐）
+      DEVOPS_API_URL:
+        from_secret: devops_api_url
+      DEVOPS_API_TOKEN:
+        from_secret: devops_api_token
+      # 数据库配置（可选，如果未配置 API 则使用数据库方式）
+      # SPOTLESS_DB_TYPE: sqlite
+      # SPOTLESS_DB_PATH: scripts/ci/spotless/database/spotless_failures.db
+      # 或 MySQL 配置（可选）
+      # SPOTLESS_DB_TYPE: mysql
+      # SPOTLESS_DB_HOST: localhost
+      # SPOTLESS_DB_PORT: 3306
+      # SPOTLESS_DB_USER: spotless
+      # SPOTLESS_DB_PASSWORD:
+      #   from_secret: spotless_db_password
+      # SPOTLESS_DB_NAME: spotless_stats
+    commands:
+      - bash scripts/ci/spotless/notify_if_failed.sh
+    when:
+      - event: [push]
+      - status: [failure, success]
+    failure: ignore
+
+  - name: maven-deploy
+    image: maven:3.9.12-eclipse-temurin-25-noble
+    commands:
+      - cd framework-dependencies
+      - mvn deploy -Dmaven.test.skip=true -B
+      - cd ../framework-infra
+      - mvn deploy -Dmaven.test.skip=true -B
+
+  - name: notify-success
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+    commands:
+      - python3 scripts/ci/notify/notify_complete.py success
+    when:
+      - status: success
+    failure: ignore
+
+  - name: notify-failure
+    image: python:3-alpine
+    environment:
+      FEISHU_BOT_URL:
+        from_secret: feishu_bot_url
+      FEISHU_BOT_SECRET:
+        from_secret: feishu_bot_secret
+    commands:
+      - python3 scripts/ci/notify/notify_complete.py failure
+    when:
+      - status: failure
+    failure: ignore

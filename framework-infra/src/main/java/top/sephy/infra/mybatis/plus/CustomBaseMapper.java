@@ -1,11 +1,11 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import org.apache.ibatis.annotations.Param;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import io.micrometer.common.util.StringUtils;
 import top.sephy.infra.exception.SystemException;
@@ -42,8 +42,6 @@ public interface CustomBaseMapper<T> extends BaseMapper<T> {
         }
         throw new SystemException(StringUtils.isBlank(errorMsg) ? "数据不存在" : errorMsg);
     }
-
-    int upsert(T entity);
 
     /**
      * 全字段插入
@@ -80,10 +78,21 @@ public interface CustomBaseMapper<T> extends BaseMapper<T> {
 
     /**
      * 查询全表
-     * 
-     * @return
+     *
+     * @return 全部记录
      */
     default List<T> selectAll() {
-        return PageHelper.offsetPage(0, 10000).doSelectPage(() -> this.selectList(Wrappers.emptyWrapper()));
+        return selectList(Wrappers.emptyWrapper());
+    }
+
+    /**
+     * 查询全表，限制返回数量
+     *
+     * @param limit 最大返回数量
+     * @return 记录列表
+     */
+    default List<T> selectAll(int limit) {
+        Page<T> page = new Page<>(1, limit, false);
+        return selectPage(page, Wrappers.emptyWrapper()).getRecords();
     }
 }

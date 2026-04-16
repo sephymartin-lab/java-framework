@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
  * 日志关键字注解，用于通过 SpEL 表达式从方法参数中提取字段信息并放入 SLF4J MDC 中
  * <p>
  * <b>单参数场景：</b>
+ * 
  * <pre>
  * &#64;LogKeyword(keyword = "userId", spel = "#{#user.id}")
  * public void processUser(User user) {
@@ -33,6 +34,7 @@ import java.lang.annotation.Target;
  * </pre>
  * <p>
  * <b>多个关键字：</b>
+ * 
  * <pre>
  * &#64;LogKeyword(keyword = "userId", spel = "#{#user.id}")
  * &#64;LogKeyword(keyword = "userName", spel = "#{#user.name}")
@@ -42,6 +44,7 @@ import java.lang.annotation.Target;
  * </pre>
  * <p>
  * <b>多参数场景：</b>
+ * 
  * <pre>
  * &#64;LogKeyword(keyword = "userId", spel = "#{#userId}")
  * &#64;LogKeyword(keyword = "orderId", spel = "#{#orderId}")
@@ -52,6 +55,7 @@ import java.lang.annotation.Target;
  * </pre>
  * <p>
  * <b>多参数 + 对象属性：</b>
+ * 
  * <pre>
  * &#64;LogKeyword(keyword = "userId", spel = "#{#user.id}")
  * &#64;LogKeyword(keyword = "orderId", spel = "#{#order.id}")
@@ -62,6 +66,7 @@ import java.lang.annotation.Target;
  * </pre>
  * <p>
  * <b>复杂表达式：</b>
+ * 
  * <pre>
  * &#64;LogKeyword(keyword = "userInfo", spel = "#{#user.id + ':' + #user.name}")
  * &#64;LogKeyword(keyword = "hasPermission", spel = "#{#user.roles.contains('ADMIN')}")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 sephy.top
+ * Copyright 2022-2026 sephy.top
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,8 +128,7 @@ public class LogKeywordAspectTest {
         User user = new User(6L, "异常用户");
 
         // When & Then
-        assertThatThrownBy(() -> testService.processUserWithException(user))
-            .isInstanceOf(RuntimeException.class)
+        assertThatThrownBy(() -> testService.processUserWithException(user)).isInstanceOf(RuntimeException.class)
             .hasMessage("测试异常");
 
         // MDC 应该已被清理（即使方法抛出异常）
@@ -293,4 +292,3 @@ public class LogKeywordAspectTest {
         private String status;
     }
 }
-
