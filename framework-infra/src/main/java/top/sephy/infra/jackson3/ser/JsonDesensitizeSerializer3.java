@@ -15,15 +15,12 @@
  */
 package top.sephy.infra.jackson3.ser;
 
-import java.io.IOException;
 import java.io.Serial;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanProperty;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.JsonSerializer;
-import tools.jackson.databind.SerializerProvider;
-import tools.jackson.databind.ser.ContextualSerializer;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.ser.std.StdSerializer;
 
 import lombok.Setter;
@@ -34,7 +31,7 @@ import top.sephy.infra.security.DesensitizationStrategy;
  * Jackson 3 版本的 JsonDesensitizeSerializer
  */
 @Setter
-public class JsonDesensitizeSerializer3 extends StdSerializer<String> implements ContextualSerializer {
+public class JsonDesensitizeSerializer3 extends StdSerializer<String> {
 
     @Serial
     private static final long serialVersionUID = -2517170909648829158L;
@@ -44,23 +41,28 @@ public class JsonDesensitizeSerializer3 extends StdSerializer<String> implements
         super(String.class);
     }
 
+    private JsonDesensitizeSerializer3(DesensitizationStrategy strategy) {
+        super(String.class);
+        this.strategy = strategy;
+    }
+
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-        throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
+        ValueSerializer<?> ser = prov.findValueSerializer(String.class);
 
-        JsonSerializer<?> ser = prov.findValueSerializer(String.class, property);
-
+        if (property == null) {
+            return ser;
+        }
         JsonDesensitize annotation = property.getAnnotation(JsonDesensitize.class);
         if (annotation != null && annotation.value() != null) {
-            this.strategy = annotation.value();
-            ser = this;
+            ser = new JsonDesensitizeSerializer3(annotation.value());
         }
 
         return ser;
     }
 
     @Override
-    public void serialize(String value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(String value, JsonGenerator gen, SerializationContext provider) {
         if (strategy != null) {
             gen.writeString(strategy.desensitize(value));
         } else {

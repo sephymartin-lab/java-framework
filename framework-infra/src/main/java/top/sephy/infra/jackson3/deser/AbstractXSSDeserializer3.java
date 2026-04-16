@@ -15,18 +15,14 @@
  */
 package top.sephy.infra.jackson3.deser;
 
-import java.io.IOException;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.BeanProperty;
 import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.JsonDeserializer;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.deser.ContextualDeserializer;
+import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.deser.ValueInstantiator;
 import tools.jackson.databind.deser.std.StdDeserializer;
-import tools.jackson.databind.deser.std.StringDeserializer;
+import tools.jackson.databind.deser.jdk.StringDeserializer;
 
 import top.sephy.infra.jackson.annotation.XSSIgnore;
 
@@ -40,8 +36,7 @@ public abstract class AbstractXSSDeserializer3 extends StdDeserializer<String> i
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
-        throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
 
         if (property != null) {
             XSSIgnore annotation = property.getAnnotation(XSSIgnore.class);
@@ -54,10 +49,10 @@ public abstract class AbstractXSSDeserializer3 extends StdDeserializer<String> i
     }
 
     @Override
-    public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    public String deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         return doDeserialize(p, ctxt);
     }
 
     protected abstract String doDeserialize(JsonParser p, DeserializationContext ctxt)
-        throws IOException, JacksonException;
+        throws JacksonException;
 }

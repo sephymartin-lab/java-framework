@@ -15,7 +15,6 @@
  */
 package top.sephy.infra.jackson3.ser;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,11 +23,9 @@ import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanProperty;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.JsonSerializer;
-import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.SerializerProvider;
-import tools.jackson.databind.ser.ContextualSerializer;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.ser.std.StdSerializer;
 
 /**
@@ -36,7 +33,7 @@ import tools.jackson.databind.ser.std.StdSerializer;
  * <p>
  * 会将LocalDateTime序列化为毫秒级时间戳
  */
-public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> implements ContextualSerializer {
+public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> {
     private static final long serialVersionUID = -3352134288289600043L;
 
     public static final CustomLocalDateTimeSerializer INSTANCE =
@@ -56,8 +53,7 @@ public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> 
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-        throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
         JsonFormat.Value format = findFormatOverrides(prov, property, handledType());
         if (format != null) {
             Boolean useTimestamp = null;
@@ -89,7 +85,7 @@ public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> 
         return this;
     }
 
-    protected JsonFormat.Value findFormatOverrides(SerializerProvider provider, BeanProperty prop,
+    protected JsonFormat.Value findFormatOverrides(SerializationContext provider, BeanProperty prop,
         Class<?> typeForDefaults) {
         if (prop != null) {
             return prop.findPropertyFormat(provider.getConfig(), typeForDefaults);
@@ -99,7 +95,7 @@ public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> 
         return provider.getDefaultPropertyFormat(typeForDefaults);
     }
 
-    protected DateTimeFormatter _useDateTimeFormatter(SerializerProvider prov, JsonFormat.Value format) {
+    protected DateTimeFormatter _useDateTimeFormatter(SerializationContext prov, JsonFormat.Value format) {
         DateTimeFormatter dtf;
         final String pattern = format.getPattern();
         final Locale locale = format.hasLocale() ? format.getLocale() : prov.getLocale();
@@ -119,7 +115,7 @@ public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> 
     }
 
     @Override
-    public void serialize(LocalDateTime value, JsonGenerator g, SerializerProvider provider) throws IOException {
+    public void serialize(LocalDateTime value, JsonGenerator g, SerializationContext provider) {
         if (useTimestamp(provider)) {
             g.writeNumber(value.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         } else {
@@ -131,7 +127,7 @@ public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> 
         }
     }
 
-    protected boolean useTimestamp(SerializerProvider provider) {
+    protected boolean useTimestamp(SerializationContext provider) {
         if (_useTimestamp != null) {
             return _useTimestamp.booleanValue();
         }
@@ -147,8 +143,8 @@ public class CustomLocalDateTimeSerializer extends StdSerializer<LocalDateTime> 
         return (_formatter == null) && (provider != null) && provider.isEnabled(getTimestampsFeature());
     }
 
-    protected SerializationFeature getTimestampsFeature() {
-        return SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+    protected DateTimeFeature getTimestampsFeature() {
+        return DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS;
     }
 
     protected DateTimeFormatter _defaultFormatter() {

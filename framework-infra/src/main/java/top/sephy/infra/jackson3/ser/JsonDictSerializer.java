@@ -12,7 +12,6 @@
  */
 package top.sephy.infra.jackson3.ser;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.springframework.core.convert.ConversionService;
@@ -51,10 +50,10 @@ public class JsonDictSerializer extends StdSerializer<Object> {
     @Override
     public void serialize(Object value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
         // 先输出原始 value 值
-        gen.writeObject(value);
+        provider.writeValue(gen, value);
 
         // 输出要添加 label 值
-        gen.writeFieldName(jsonDictMeta.getLabelFieldName());
+        gen.writeName(jsonDictMeta.getLabelFieldName());
 
         JsonDict annotation = jsonDictMeta.getAnnotation();
         Object defaultLabelVal = conversionService.convert(annotation.defaultLabelValue(), annotation.labelClass());
@@ -62,10 +61,10 @@ public class JsonDictSerializer extends StdSerializer<Object> {
         // 数组或者集合类型, 需要逐个输出
         if (value instanceof Collection<?>) {
             Collection<?> collection = (Collection<?>)value;
-            writeArray(gen, collection.toArray(), annotation, defaultLabelVal);
+            writeArray(gen, provider, collection.toArray(), annotation, defaultLabelVal);
         } else if (value instanceof Object[]) {
             Object[] objects = (Object[])value;
-            writeArray(gen, objects, annotation, defaultLabelVal);
+            writeArray(gen, provider, objects, annotation, defaultLabelVal);
         } else {
             DictEntry<Object, Object> option = dictEntryProvider.lookUpOption(annotation.type(), value,
                 annotation.compareWithString(), annotation.caseSensitive());
@@ -76,13 +75,13 @@ public class JsonDictSerializer extends StdSerializer<Object> {
             if (jsonDictMeta.isWriteString()) {
                 gen.writeString(String.valueOf(val));
             } else {
-                gen.writeObject(val);
+                provider.writeValue(gen, val);
             }
         }
     }
 
-    private void writeArray(JsonGenerator gen, Object[] array, JsonDict annotation, Object defaultLabelVal)
-        throws IOException {
+    private void writeArray(JsonGenerator gen, SerializationContext provider, Object[] array, JsonDict annotation,
+        Object defaultLabelVal) throws JacksonException {
         gen.writeStartArray();
         for (Object orig : array) {
             DictEntry<Object, Object> option = dictEntryProvider.lookUpOption(annotation.type(), orig,
@@ -94,7 +93,7 @@ public class JsonDictSerializer extends StdSerializer<Object> {
             if (jsonDictMeta.isWriteString()) {
                 gen.writeString(String.valueOf(val));
             } else {
-                gen.writeObject(val);
+                provider.writeValue(gen, val);
             }
         }
         gen.writeEndArray();

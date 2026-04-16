@@ -15,7 +15,6 @@
  */
 package top.sephy.infra.jackson3.deser;
 
-import java.io.IOException;
 import java.io.Serial;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,7 @@ public class XSSDeserializer3 extends AbstractXSSDeserializer3 {
     public XSSDeserializer3() {}
 
     @Override
-    protected String doDeserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    protected String doDeserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         String val = StringUtils.trim(p.getValueAsString());
         return XSSUtils.stripXSS(val);
     }

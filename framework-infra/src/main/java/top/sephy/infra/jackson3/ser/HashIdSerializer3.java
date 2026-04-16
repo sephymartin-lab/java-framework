@@ -15,17 +15,13 @@
  */
 package top.sephy.infra.jackson3.ser;
 
-import java.io.IOException;
-
 import org.hashids.Hashids;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanProperty;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.JsonSerializer;
-import tools.jackson.databind.SerializerProvider;
-import tools.jackson.databind.ser.ContextualSerializer;
-import tools.jackson.databind.ser.std.NumberSerializers;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.jdk.NumberSerializers;
 import tools.jackson.databind.ser.std.StdSerializer;
 
 import lombok.NonNull;
@@ -34,7 +30,7 @@ import top.sephy.infra.jackson.annotation.JsonHashId;
 /**
  * Jackson 3 版本的 HashIdSerializer
  */
-public class HashIdSerializer3 extends StdSerializer<Long> implements ContextualSerializer {
+public class HashIdSerializer3 extends StdSerializer<Long> {
 
     private Hashids hashids;
 
@@ -44,7 +40,7 @@ public class HashIdSerializer3 extends StdSerializer<Long> implements Contextual
     }
 
     @Override
-    public void serialize(Long value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(Long value, JsonGenerator gen, SerializationContext serializers) {
         if (value == null) {
             gen.writeNull();
             return;
@@ -53,8 +49,7 @@ public class HashIdSerializer3 extends StdSerializer<Long> implements Contextual
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-        throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
         if (property != null) {
             JsonHashId jsonHashId = property.getAnnotation(JsonHashId.class);
             if (jsonHashId != null) {

@@ -148,7 +148,8 @@
         <!-- https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/analysis-parameters/ -->
         <cleanthat.version>2.24</cleanthat.version>
         <mybatis-plus-spring-boot3-starter.version>3.5.16</mybatis-plus-spring-boot3-starter.version>
-        <mybatis-spring-boot.version>3.0.4</mybatis-spring-boot.version>
+        <mybatis-plus-spring-boot4-starter.version>3.5.16</mybatis-plus-spring-boot4-starter.version>
+        <mybatis-spring-boot.version>4.0.1</mybatis-spring-boot.version>
         <smart-doc-maven-plugin.version>3.0.5</smart-doc-maven-plugin.version>
         <scalar-webmvc.version>0.5.57</scalar-webmvc.version>
     </properties>
