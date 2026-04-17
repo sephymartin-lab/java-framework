@@ -112,7 +112,7 @@
         <playwright.version>1.57.0</playwright.version>
         <poi.version>4.1.2</poi.version>
 
-        <redisson.version>3.47.0</redisson.version>
+        <redisson.version>4.3.1</redisson.version>
         <rewrite-maven-plugin.version>6.8.1</rewrite-maven-plugin.version>
         <rewrite-static-analysis.vesion>2.9.0</rewrite-static-analysis.vesion>
         <rome.version>2.1.0</rome.version>
@@ -379,6 +379,11 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-cache</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
             <dependency>
