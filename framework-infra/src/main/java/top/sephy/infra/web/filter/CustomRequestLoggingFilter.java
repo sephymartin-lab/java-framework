@@ -54,6 +54,8 @@ import top.sephy.infra.utils.ServletHttpRequestUtils;
  */
 public class CustomRequestLoggingFilter extends AbstractRequestLoggingFilter {
 
+    static int CACHE_LIMIT = 1_048_576;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
@@ -202,7 +204,7 @@ public class CustomRequestLoggingFilter extends AbstractRequestLoggingFilter {
         private AtomicBoolean isFirst = new AtomicBoolean(true);
 
         public CustomContentCachingRequestWrapper(HttpServletRequest request) {
-            super(request);
+            super(request, CACHE_LIMIT);
         }
 
         public CustomContentCachingRequestWrapper(HttpServletRequest request, int contentCacheLimit) {

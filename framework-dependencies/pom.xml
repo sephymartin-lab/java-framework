@@ -13,7 +13,7 @@
 
     <groupId>top.sephy</groupId>
     <artifactId>framework-dependencies</artifactId>
-    <version>${revision}</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>framework-dependencies</name>
@@ -34,7 +34,6 @@
     <properties>
         <revision>4.0.0-SNAPSHOT</revision>
         <tika-core.version>1.22</tika-core.version>
-        <rversion>0.1.0-SNAPSHOT</rversion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <custom.lib-path>${basedir}/lib</custom.lib-path>
