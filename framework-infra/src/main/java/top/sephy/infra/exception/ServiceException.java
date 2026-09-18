@@ -17,22 +17,43 @@ package top.sephy.infra.exception;
 
 import java.io.Serial;
 
+import lombok.Getter;
+import lombok.NonNull;
+
 /**
  * @author sephy
  * @date 2020-06-14 00:52
  */
+@Getter
 public class ServiceException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 3007273321183731025L;
 
-    public ServiceException() {}
+    /** 未显式指定错误码的新异常使用通用业务错误码。 */
+    public static final String DEFAULT_ERROR_CODE = "BIZ_ERROR";
 
-    public ServiceException(String message) {
-        super(message);
+    private final String errorCode;
+
+    private ServiceException(String errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
     }
 
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
+    public static ServiceException newInstance(@NonNull String message) {
+        return new ServiceException(DEFAULT_ERROR_CODE, message, null);
+    }
+
+    public static ServiceException newInstance(@NonNull String message, @NonNull Throwable cause) {
+        return new ServiceException(DEFAULT_ERROR_CODE, message, cause);
+    }
+
+    public static ServiceException newInstance(@NonNull String errorCode, @NonNull String message) {
+        return new ServiceException(errorCode, message, null);
+    }
+
+    public static ServiceException newInstance(@NonNull String errorCode, @NonNull String message,
+        @NonNull Throwable cause) {
+        return new ServiceException(errorCode, message, cause);
     }
 }

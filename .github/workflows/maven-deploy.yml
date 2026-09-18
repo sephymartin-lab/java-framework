@@ -54,8 +54,6 @@ jobs:
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
             
-            <localRepository>/root/.m2/repository</localRepository>
-            
             <servers>
               <server>
                 <id>sephy-maven-releases</id>
@@ -143,28 +141,28 @@ jobs:
           echo "========================================="
           echo "📁 Maven 配置检查"
           echo "========================================="
-          if [ -d "/root/.m2" ]; then
-            echo "✅ /root/.m2 目录存在"
-            ls -lah /root/.m2/ 2>/dev/null || echo "无法列出目录内容"
+          if [ -d "$HOME/.m2" ]; then
+            echo "✅ $HOME/.m2 目录存在"
+            ls -lah "$HOME/.m2/" 2>/dev/null || echo "无法列出目录内容"
             echo ""
             
-            if [ -f "/root/.m2/settings.xml" ]; then
+            if [ -f "$HOME/.m2/settings.xml" ]; then
               echo "✅ settings.xml 存在"
               echo "Maven 有效配置（Nexus 相关）:"
-              mvn help:effective-settings | grep -A 5 -B 2 "nexus" || echo "未找到 nexus 配置"
+              mvn help:effective-settings | grep -A 5 -B 2 -E "sephy-maven|maven\.sephy\.top" || echo "未找到 Maven 私服配置"
             else
               echo "⚠️  settings.xml 不存在"
             fi
             echo ""
             
-            if [ -d "/root/.m2/repository" ]; then
+            if [ -d "$HOME/.m2/repository" ]; then
               echo "✅ Maven 本地仓库存在"
-              echo "缓存大小: $(du -sh /root/.m2/repository 2>/dev/null | cut -f1 || echo '未知')"
+              echo "缓存大小: $(du -sh "$HOME/.m2/repository" 2>/dev/null | cut -f1 || echo '未知')"
             else
               echo "ℹ️  Maven 本地仓库不存在（首次构建会创建）"
             fi
           else
-            echo "❌ /root/.m2 目录不存在 - 挂载失败！"
+            echo "❌ $HOME/.m2 目录不存在 - 无法创建 Maven 用户目录！"
             exit 1
           fi
           echo "========================================="
@@ -176,6 +174,8 @@ jobs:
           echo "🚀 开始部署 framework-dependencies"
           echo "========================================="
 
+          set -o pipefail
+
           # 根据 enable_debug 参数决定是否添加 -X
           DEBUG_FLAG=""
           if [ "${{ github.event.inputs.enable_debug }}" = "true" ]; then
@@ -184,10 +184,8 @@ jobs:
           fi
 
           mvn deploy \
-            -DaltDeploymentRepository=releases::default::https://maven.sephy.top/releases/ \
-            -DaltDeploymentRepository=snapshots::default::https://maven.sephy.top/snapshots/ \
             -Dmaven.test.skip=${{ github.event.inputs.skip_tests || 'true' }} \
-            -B $DEBUG_FLAG | tee /tmp/maven-deploy-deps.log || {
+            -B $DEBUG_FLAG 2>&1 | tee /tmp/maven-deploy-deps.log || {
               echo "❌ 部署失败，查看错误日志:"
               tail -100 /tmp/maven-deploy-deps.log
               exit 1
@@ -201,6 +199,8 @@ jobs:
           echo "🚀 开始部署 framework-infra"
           echo "========================================="
 
+          set -o pipefail
+
           # 根据 enable_debug 参数决定是否添加 -X
           DEBUG_FLAG=""
           if [ "${{ github.event.inputs.enable_debug }}" = "true" ]; then
@@ -209,10 +209,8 @@ jobs:
           fi
 
           mvn deploy \
-            -DaltDeploymentRepository=releases::default::https://maven.sephy.top/releases/ \
-            -DaltDeploymentRepository=snapshots::default::https://maven.sephy.top/snapshots/ \
             -Dmaven.test.skip=${{ github.event.inputs.skip_tests || 'true' }} \
-            -B $DEBUG_FLAG | tee /tmp/maven-deploy-infra.log || {
+            -B $DEBUG_FLAG 2>&1 | tee /tmp/maven-deploy-infra.log || {
               echo "❌ 部署失败，查看错误日志:"
               tail -100 /tmp/maven-deploy-infra.log
               exit 1
